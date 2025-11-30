@@ -2,6 +2,7 @@ import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { ThemeSelector } from './ThemeSelector';
+import { ThemeProvider } from '../context/ThemeContext';
 
 // Mock localStorage
 class LocalStorageMock {
@@ -21,7 +22,11 @@ Object.defineProperty(window, 'matchMedia', {
 
 describe('ThemeSelector', () => {
   it('defaults to corporate-dark and switches to corporate-light', () => {
-    render(<ThemeSelector />);
+    render(
+      <ThemeProvider>
+        <ThemeSelector />
+      </ThemeProvider>
+    );
     const darkRadio = screen.getByDisplayValue('corporate-dark');
     const lightRadio = screen.getByDisplayValue('corporate-light');
     expect(darkRadio).toBeChecked();

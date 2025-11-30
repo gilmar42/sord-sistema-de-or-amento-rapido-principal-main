@@ -54,11 +54,9 @@ export const MainLayout: React.FC = () => {
   
 
 
-  const isCorpDark = theme === 'corporate-dark';
-  const isCorpLight = theme === 'corporate-light';
-  const rootThemeClass = isCorpDark ? 'theme-corp corp-dark' : 'theme-corp corp-light';
-  const asideClass = isCorpDark ? 'corp-sidebar-dark corp-glow-ring' : 'corp-sidebar-light corp-glow-ring';
-  const mainSurfaceClass = isCorpDark ? 'corp-surface-dark' : 'corp-surface-light';
+  const rootThemeClass = 'theme-corp corp-dark';
+  const asideClass = 'corp-sidebar-dark corp-glow-ring';
+  const mainSurfaceClass = 'corp-surface-dark';
 
   return (
       <div className={`${rootThemeClass} flex flex-col md:flex-row min-h-screen transition-all duration-500 ease-in-out`}>
