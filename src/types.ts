@@ -51,29 +51,13 @@ export interface Quote {
   freightCost: number;
   profitMargin: number; // percentage
   isFreightEnabled?: boolean; // Add this line
-}
-
-// ---------------------- SERVICE QUOTE TYPES ----------------------
-// Linha de serviço individual com cálculo de horas, custos externos, margem e impostos.
-export interface ServiceLine {
-  id: string;
-  title: string; // nome curto do serviço
-  description: string;
-  category?: string; // categoria opcional (ex: Consultoria, Implementação)
-  hours: number; // quantidade de horas previstas
-  hourlyRate: number; // valor por hora (R$)
-  externalCosts: number; // custos adicionais (deslocamento, materiais avulsos, etc.)
-  marginPercent: number; // margem aplicada sobre (hours*hourlyRate + externalCosts)
-  taxPercent: number; // imposto aplicado após margem
-}
-
-// Orçamento de serviços agregando múltiplas linhas.
-export interface ServiceQuote {
-  id: string;
-  date: string;
-  clientName: string;
-  lines: ServiceLine[];
-  notes?: string;
+  // Hora Homem
+  laborHours?: number;
+  laborHourlyRate?: number;
+  numberOfWorkers?: number;
+  // Hora Máquina
+  machineHours?: number;
+  machineHourlyRate?: number;
 }
 
 export interface AppSettings {
@@ -93,6 +77,10 @@ export interface CalculatedCosts {
   profitValue: number;
   finalValue: number;
   totalWeight: number;
+  // Custos de hora homem
+  laborCost: number;
+  // Custos de hora máquina
+  machineCost: number;
 }
 
 // New types for SaaS Authentication
@@ -122,4 +110,25 @@ export interface Client {
   document: string; // CPF ou CNPJ
   notes: string;
   createdAt: string;
+}
+
+// Service Quote Types
+export interface ServiceLine {
+  id: string;
+  title: string;
+  description: string;
+  category: string;
+  hours: number;
+  hourlyRate: number;
+  externalCosts: number;
+  marginPercent: number;
+  taxPercent: number;
+}
+
+export interface ServiceQuote {
+  id: string;
+  date: string;
+  clientName: string;
+  lines: ServiceLine[];
+  notes: string;
 }

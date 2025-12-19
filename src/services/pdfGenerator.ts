@@ -1,4 +1,4 @@
-import { Quote, Material, AppSettings, CalculatedCosts, ServiceQuote, ServiceLine } from '../types';
+import { Quote, Material, AppSettings, CalculatedCosts } from '../types';
 import { formatComponentSize } from '../utils/componentUtils';
 
 // These are expected to be available in the global scope from the scripts in index.html
@@ -89,13 +89,28 @@ export const generateQuotePDF = (quote: Quote, materials: Material[], settings: 
   doc.setFont(undefined, 'normal');
   doc.text(`Peso Total Geral: ${calculated.totalWeight.toFixed(2)} kg`, 15, finalY + 10);
   
+  let summaryY = finalY + 20;
+  if (calculated.laborCost > 0) {
+    const workers = quote.numberOfWorkers || 1;
+    const detailText = workers > 1 
+      ? `${workers} homens × ${quote.laborHours || 0}h × R$ ${quote.laborHourlyRate || 0}/h`
+      : `${quote.laborHours || 0}h × R$ ${quote.laborHourlyRate || 0}/h`;
+    doc.text(`Custo Hora Homem: R$ ${calculated.laborCost.toFixed(2)} (${detailText})`, 15, summaryY);
+    summaryY += 7;
+  }
+  
+  if (calculated.machineCost > 0) {
+    doc.text(`Custo Hora Máquina: R$ ${calculated.machineCost.toFixed(2)} (${quote.machineHours || 0}h × R$ ${quote.machineHourlyRate || 0}/h)`, 15, summaryY);
+    summaryY += 7;
+  }
+  
   doc.setFontSize(16);
   doc.setFont(undefined, 'bold');
-  doc.text(`Valor Total do Orçamento: R$ ${calculated.finalValue.toFixed(2)}`, 15, finalY + 20);
+  doc.text(`Valor Total do Orçamento: R$ ${calculated.finalValue.toFixed(2)}`, 15, summaryY);
 
   // Components Table
   if (quote.items.length > 0) {
-    let componentsStartY = finalY + 40; // Adjust starting Y for components table
+    let componentsStartY = summaryY + 20; // Adjust starting Y for components table
     doc.setFontSize(14);
     doc.setFont(undefined, 'bold');
     doc.text("Componentes do Produto Final", 15, componentsStartY);
@@ -163,73 +178,95 @@ export const generateQuotePDF = (quote: Quote, materials: Material[], settings: 
   }
 };
 
-// ---------------------------------------------------------------
-// Geração de PDF para Orçamento de Serviços (ServiceQuote)
-// ---------------------------------------------------------------
-export const generateServiceQuotePDF = (serviceQuote: ServiceQuote): Blob | string => {
+// Service Quote PDF Generator
+export const generateServiceQuotePDF = (quote: any): Blob | string => {
   const { jsPDF } = jspdf;
   const doc = new jsPDF() as jsPDFWithAutoTable;
 
-  // Header simples
-  doc.setFontSize(18);
-  doc.text('Orçamento de Serviços', 15, 20);
-  doc.setFontSize(10);
-  doc.text(`ID: ${serviceQuote.id}`, 15, 27);
-  doc.text(`Data: ${new Date(serviceQuote.date).toLocaleDateString('pt-BR')}`, 15, 32);
-  doc.text(`Cliente: ${serviceQuote.clientName || 'Não informado'}`, 15, 37);
+  // Header
+  doc.setFontSize(20);
+  doc.text('Orçamento de Serviços', 15, 25);
+  
+  // Quote Info
+  doc.setFontSize(12);
+  doc.text(`Orçamento Nº: ${quote.id}`, 15, 40);
+  doc.text(`Data: ${new Date(quote.date).toLocaleDateString('pt-BR')}`, 15, 47);
+  doc.text(`Cliente: ${quote.clientName || 'Não informado'}`, 15, 54);
+  
+  // Services Table
+  const tableColumn = ["Serviço", "Horas", "R$/Hora", "Custos Extras", "Total"];
+  const tableRows: any[] = [];
 
-  // Tabela de linhas (inclui título e categoria)
-  const head = [['Serviço', 'Categoria', 'Descrição', 'Horas', 'R$/Hora', 'Custos Extra', 'Total (R$)']];
-  const body: any[] = [];
-  let totalGeral = 0;
-  serviceQuote.lines.forEach((line: ServiceLine) => {
+  let totalBase = 0;
+  let totalMargin = 0;
+  let totalTax = 0;
+  let grandTotal = 0;
+
+  quote.lines.forEach((line: any) => {
     const base = (line.hours * line.hourlyRate) + line.externalCosts;
     const marginValue = base * (line.marginPercent / 100);
     const taxable = base + marginValue;
     const taxValue = taxable * (line.taxPercent / 100);
     const total = base + marginValue + taxValue;
-    totalGeral += total;
-    body.push([
-      line.title || '-',
-      line.category || '-',
-      line.description || '-',
+
+    totalBase += base;
+    totalMargin += marginValue;
+    totalTax += taxValue;
+    grandTotal += total;
+
+    const row = [
+      line.title,
       line.hours.toFixed(2),
-      line.hourlyRate.toFixed(2),
-      line.externalCosts.toFixed(2),
-      total.toFixed(2)
-    ]);
+      `R$ ${line.hourlyRate.toFixed(2)}`,
+      `R$ ${line.externalCosts.toFixed(2)}`,
+      `R$ ${total.toFixed(2)}`
+    ];
+    tableRows.push(row);
   });
 
   doc.autoTable({
-    head,
-    body,
-    startY: 45,
+    head: [tableColumn],
+    body: tableRows,
+    startY: 65,
     theme: 'grid',
-    headStyles: { fillColor: [59,130,246] }
+    headStyles: { fillColor: [59, 130, 246] },
   });
 
-  const finalY = doc.lastAutoTable ? doc.lastAutoTable.finalY + 10 : 55;
+  // Summary
+  const finalY = doc.lastAutoTable.finalY + 20;
   doc.setFontSize(14);
   doc.setFont(undefined, 'bold');
-  doc.text('Resumo', 15, finalY);
+  doc.text("Resumo Final", 15, finalY);
+
   doc.setFontSize(12);
   doc.setFont(undefined, 'normal');
-  doc.text(`Total Geral: R$ ${totalGeral.toFixed(2)}`, 15, finalY + 8);
-  if (serviceQuote.notes) {
-    doc.setFontSize(11);
-    doc.text('Observações:', 15, finalY + 18);
-    const wrapped = (doc as any).splitTextToSize(serviceQuote.notes, 180);
-    doc.text(wrapped, 15, finalY + 25);
+  doc.text(`Custo Base: R$ ${totalBase.toFixed(2)}`, 15, finalY + 10);
+  doc.text(`Margem: R$ ${totalMargin.toFixed(2)}`, 15, finalY + 17);
+  doc.text(`Impostos: R$ ${totalTax.toFixed(2)}`, 15, finalY + 24);
+  
+  doc.setFontSize(16);
+  doc.setFont(undefined, 'bold');
+  doc.text(`Valor Total: R$ ${grandTotal.toFixed(2)}`, 15, finalY + 35);
+
+  // Notes
+  if (quote.notes) {
+    doc.setFontSize(12);
+    doc.setFont(undefined, 'bold');
+    doc.text("Observações:", 15, finalY + 50);
+    doc.setFont(undefined, 'normal');
+    doc.text(quote.notes, 15, finalY + 57);
   }
 
+  // Save PDF
   try {
     const arrayBuffer = doc.output('arraybuffer');
-    return new Blob([arrayBuffer], { type: 'application/pdf' });
+    const blob = new Blob([arrayBuffer], { type: 'application/pdf' });
+    return blob;
   } catch (e) {
     try {
       return doc.output('datauristring');
     } catch (err) {
-      console.error('Failed to generate service quote PDF:', err);
+      console.error('Failed to generate Service PDF:', err);
       throw err;
     }
   }

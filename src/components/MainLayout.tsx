@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { QuoteCalculator } from './QuoteCalculator';
-import { ServiceQuoteCalculator } from './ServiceQuoteCalculator';
 import { MaterialManagement } from './MaterialManagement';
 import { ClientManagement } from './ClientManagement';
 import { Settings } from './Settings';
@@ -9,18 +8,16 @@ import { Quote } from '../types';
 import { SoredIcon, CalculatorIcon, BoxIcon, CogIcon, DocumentTextIcon, ArrowLeftOnRectangleIcon, SunIcon, MoonIcon, UserGroupIcon } from './Icons';
 import { useAuth } from './../context/AuthContext';
 import { NavItem } from './NavItem';
-// import { useDarkMode } from '../hooks/useDarkMode'; // replaced by useTheme
-import { useTheme } from '../hooks/useTheme';
-import { ThemeSelector } from './ThemeSelector';
+import { useDarkMode } from '../hooks/useDarkMode';
 
 
-type View = 'calculator' | 'materials' | 'settings' | 'quotes' | 'clients' | 'service';
+type View = 'calculator' | 'materials' | 'settings' | 'quotes' | 'clients';
 
 export const MainLayout: React.FC = () => {
   const [currentView, setCurrentView] = useState<View>('calculator');
   const [quoteToEdit, setQuoteToEdit] = useState<Quote | null>(null);
   const { logout } = useAuth();
-  const { theme, setTheme } = useTheme();
+  const { isDark, toggleDarkMode } = useDarkMode();
 
   // Diagnostic: log view changes during debugging
   React.useEffect(() => {
@@ -36,9 +33,6 @@ export const MainLayout: React.FC = () => {
     switch (currentView) {
       case 'calculator':
         return <QuoteCalculator data-testid="quote-calculator" quoteToEdit={quoteToEdit} setQuoteToEdit={setQuoteToEdit} onNavigateToMaterials={() => setCurrentView('materials')} />;
-      case 'service':
-        // Lazy import pattern simplified: component directly imported below after creation.
-        return <ServiceQuoteCalculator />;
       case 'materials':
         return <MaterialManagement activeView={currentView} />;
       case 'clients':
@@ -54,26 +48,28 @@ export const MainLayout: React.FC = () => {
   
 
 
-  const rootThemeClass = 'theme-corp corp-dark';
-  const asideClass = 'corp-sidebar-dark corp-glow-ring';
-  const mainSurfaceClass = 'corp-surface-dark';
-
   return (
-      <div className={`${rootThemeClass} flex flex-col md:flex-row min-h-screen transition-all duration-500 ease-in-out`}>
-        <aside className={`${asideClass} w-full md:w-60 fixed bottom-0 md:relative md:min-h-screen z-20 flex flex-col transition-all duration-500 ease-in-out p-0`}>
+      <div className="flex flex-col md:flex-row min-h-screen bg-ice-50 dark:bg-slate-900 transition-all duration-300 ease-in-out">
+        <aside className="w-full md:w-56 bg-gradient-to-b from-sidebar-700 to-sidebar-900 dark:from-sidebar-800 dark:to-slate-900 shadow-lg hover:shadow-xl fixed bottom-0 md:relative md:min-h-screen z-20 flex flex-col transition-all duration-300 ease-in-out backdrop-blur-sm">
           <div className="px-4 py-6 flex-grow">
             <div className="flex items-center justify-between md:justify-center text-white mb-8 group">
               <div className="flex items-center hover:scale-105 transition-all duration-300 ease-in-out">
-                <SoredIcon className="w-8 h-8 group-hover:rotate-12 transition-transform duration-500 ease-in-out text-gradient-accent"/>
-                <h1 className="ml-2 text-xl font-bold hidden md:block transition-all duration-500 tracking-wide text-gradient-accent">SORED</h1>
+                <SoredIcon className="w-8 h-8 text-ice-300 group-hover:rotate-12 transition-transform duration-300 ease-in-out"/>
+                <h1 className="ml-2 text-xl font-bold text-white hidden md:block bg-gradient-to-r from-ice-200 to-ice-400 bg-clip-text text-transparent group-hover:from-ice-400 group-hover:to-ice-200 transition-all duration-300">SORED</h1>
               </div>
-              <div className="md:hidden">
-                <ThemeSelector />
-              </div>
+              <button
+                onClick={toggleDarkMode}
+                className="p-2 rounded-lg hover:bg-sidebar-600 dark:hover:bg-slate-700 transition-all duration-300 ease-in-out transform hover:scale-110 active:scale-95 md:hidden group shadow-lg hover:shadow-xl"
+                aria-label="Toggle dark mode"
+              >
+                {isDark ? 
+                  <SunIcon className="w-5 h-5 text-ice-200 group-hover:text-yellow-300 transition-all duration-300 group-hover:rotate-180" /> : 
+                  <MoonIcon className="w-5 h-5 text-ice-200 group-hover:text-ice-100 transition-all duration-300 group-hover:-rotate-12" />
+                }
+              </button>
             </div>
             <nav className="flex flex-row md:flex-col justify-around md:space-y-2">
               <NavItem view="calculator" label="Novo Orçamento" icon={<CalculatorIcon className="w-5 h-5" />} currentView={currentView} setCurrentView={setCurrentView} setQuoteToEdit={setQuoteToEdit} />
-              <NavItem view="service" label="Serviços" icon={<DocumentTextIcon className="w-5 h-5" />} currentView={currentView} setCurrentView={setCurrentView} setQuoteToEdit={setQuoteToEdit} />
               <NavItem view="quotes" label="Orçamentos" icon={<DocumentTextIcon className="w-5 h-5" />} currentView={currentView} setCurrentView={setCurrentView} setQuoteToEdit={setQuoteToEdit} />
               <NavItem view="clients" label="Clientes" icon={<UserGroupIcon className="w-5 h-5" />} currentView={currentView} setCurrentView={setCurrentView} setQuoteToEdit={setQuoteToEdit} />
               <NavItem view="materials" label="Materiais" icon={<BoxIcon className="w-5 h-5" />} currentView={currentView} setCurrentView={setCurrentView} setQuoteToEdit={setQuoteToEdit} />
@@ -81,13 +77,23 @@ export const MainLayout: React.FC = () => {
             </nav>
           </div>
           <div className="p-4 hidden md:block space-y-2">
-            <ThemeSelector />
+            <button
+              onClick={toggleDarkMode}
+              className="w-full flex items-center space-x-3 px-4 py-2 rounded-lg hover:bg-sidebar-600 dark:hover:bg-slate-700 transition-all duration-300 ease-in-out text-ice-100 dark:text-slate-300 group hover:scale-105 active:scale-95 hover:shadow-lg"
+              aria-label="Toggle dark mode"
+            >
+              {isDark ? 
+                <SunIcon className="w-5 h-5 text-ice-200 group-hover:text-yellow-300 transition-all duration-300 group-hover:rotate-180" /> : 
+                <MoonIcon className="w-5 h-5 text-ice-200 group-hover:text-ice-100 transition-all duration-300 group-hover:-rotate-12" />
+              }
+              <span className="text-sm font-medium text-white group-hover:text-ice-100 transition-colors duration-300">{isDark ? 'Modo Claro' : 'Modo Escuro'}</span>
+            </button>
             <NavItem label="Sair" icon={<ArrowLeftOnRectangleIcon className="w-5 h-5" />} onClick={logout} currentView={currentView} setCurrentView={setCurrentView} setQuoteToEdit={setQuoteToEdit} />
           </div>
         </aside>
 
-        <main className={`flex-1 p-4 sm:p-6 lg:p-10 pb-24 md:pb-8 transition-all duration-700 ease-in-out ${mainSurfaceClass}`} data-testid="main-view-container">
-          <div className="animate-fade-in-up space-y-6">
+        <main className="flex-1 p-4 sm:p-6 lg:p-8 pb-24 md:pb-8 transition-all duration-500 ease-in-out transform" data-testid="main-view-container">
+          <div className="animate-fade-in-up">
             {renderView()}
           </div>
         </main>

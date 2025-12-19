@@ -2,7 +2,6 @@
 import React from 'react';
 import { useAuth } from './context/AuthContext';
 import { DataProvider } from './context/DataContext';
-import { ThemeProvider } from './context/ThemeContext';
 import { AuthPage } from './components/auth/AuthPage';
 import { MainLayout } from './components/MainLayout';
 import ToastContainer from './components/ToastContainer';
@@ -32,11 +31,7 @@ const AppContent: React.FC = () => {
 };
 
 const App: React.FC = () => {
-  return (
-    <ThemeProvider>
-      <AppContent />
-    </ThemeProvider>
-  );
+  return <AppContent />;
 };
 
 export default App;

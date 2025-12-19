@@ -5,58 +5,6 @@ Sistema completo de gestão de orçamentos com cálculos automáticos, gestão d
 ## ✨ Funcionalidades
 
 - 📊 **Calculadora de Orçamentos** - Cálculos automáticos baseados em componentes
-- 🛠️ **Orçamento de Serviços (Novo)** - Cálculo por horas, custos extras, margem e impostos com exportação em PDF
-- 🎨 **Tema Moderno (Novo)** - Nova paleta com gradientes, vidro (glass), sombras suaves e tipografia com alto contraste
-## 🌈 Tema Moderno
-
-O projeto agora inclui um tema visual moderno baseado em:
-
-
-### Como funciona
-O wrapper principal recebe a classe `theme-modern` (já aplicada em `MainLayout`). Novas utilitárias adicionadas em `index.css`:
-
-### Futuro (Modern)
-- Extrair tokens para arquivo dedicado
-- Padronizar `<Button variant="modern"/>`
-
-## 🔀 Seletor de Tema
-
-O antigo modo claro (navbar azul + fundo gelo) foi descontinuado e substituído pelo tema corporativo. Preferências antigas migradas automaticamente via `useTheme`.
-
-O tema moderno foi evoluído para um tema corporativo consistente com duas variantes:
-
-- `corporate-dark`: Fundo profundo neutro, azul institucional em gradientes discretos, superfícies elevadas com foco em legibilidade.
-- `corporate-light`: Navbar azul escuro sólido em destaque, fundo gelo claro com alto contraste de tipografia e cartões suaves.
-
-### Estrutura de Classes
-- Root: `theme-corp corp-dark` ou `theme-corp corp-light`
-- Sidebar: `corp-sidebar-dark` | `corp-sidebar-light`
-- Superfícies: `corp-surface-dark` | `corp-surface-light`
-- Botões primários: `corp-button-primary-dark` | `corp-button-primary-light`
-- Outline / secundários: `corp-button-outline`
-- Destaque/acento: `corp-accent-badge`
-
-### Tokens Principais
-Definidos em `index.css` usando variáveis `--corp-*` (cores, backgrounds, bordas, textos, acentos).
-
-### Seleção de Tema
-Feita pelo componente `ThemeSelector` usando `useTheme` (modos: `corporate-dark` / `corporate-light`). Migração automática de valores antigos (`dark` → `corporate-dark`, `light` → `corporate-light`).
-
-### Extensões Futuras
-- Adicionar `corporate-high-contrast`
-- Extrair design tokens para arquivo dedicado (`theme.corp.css`)
-- Criar componentes de UI reutilizáveis para padronizar botões, cards e badges.
-
-Agora o tema é controlado via `ThemeSelector` usando o hook `useTheme` (dark/ light).\n
-- Padrão: Escuro\n- Claro: Navbar azul escuro + fundo gelo grafite com texto de alto contraste\n
-Arquivos principais:\n- `hooks/useTheme.ts` – Persistência e aplicação de classes\n- `components/ThemeSelector.tsx` – Interface de seleção\n- `MainLayout.tsx` – Aplica classes condicionais\n
-Classes aplicadas:\n- Dark: `theme-modern` + superfícies `modern-*`\n- Light: `theme-modern light-mode ice-graphite-bg` + `navbar-blue` + `ice-graphite-surface`\n
-Para adicionar mais temas, basta estender o hook e criar novas classes de wrapper.
-- Tornar seleção de tema (clássico vs moderno) configurável via Settings
-- Extrair tokens para um arquivo dedicado (ex: `theme.css`)
-- Criar componente `<Button variant="modern" />` para padronização
-
-Se desejar, posso adicionar a alternância entre temas ou refatorar componentes para usar variantes. Basta pedir. 😄
 - 🔧 **Gestão de Materiais** - Controle completo de materiais e componentes
 - 👥 **Gestão de Clientes** - CRUD completo com busca e estatísticas
 - 📄 **Geração de PDF** - Orçamentos profissionais em PDF
@@ -196,4 +144,4 @@ Este projeto está sob a licença MIT.
 
 ---
 
-**Última Atualização**: 29 de Novembro de 2025
+**Última Atualização**: 20 de Novembro de 2025

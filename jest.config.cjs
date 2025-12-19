@@ -13,7 +13,6 @@ const jestConfig = {
     '^@/(.*)$': '<rootDir>/src/$1',
   },
   moduleDirectories: ['node_modules', 'src'],
-  modulePathIgnorePatterns: ['<rootDir>/sored-novo/'], // Ignora subprojeto para evitar duplicação de mocks
   transform: {
     '^.+\\.(ts|tsx)$' : 'ts-jest',
     '^.+\\.(js|jsx|mjs)$' : 'babel-jest',

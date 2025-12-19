@@ -189,20 +189,6 @@ export const ClientManagement: React.FC = () => {
 
                 <div className="md:col-span-2">
                   <label className="block text-sm font-medium text-textSecondary dark:text-slate-300 mb-2">
-                    CPF/CNPJ
-                  </label>
-                  <input
-                    type="text"
-                    name="document"
-                    value={formData.document}
-                    onChange={handleInputChange}
-                    className="w-full px-4 py-3 border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-textPrimary dark:text-white rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition-all duration-300"
-                    placeholder="000.000.000-00 ou 00.000.000/0000-00"
-                  />
-                </div>
-
-                <div className="md:col-span-2">
-                  <label className="block text-sm font-medium text-textSecondary dark:text-slate-300 mb-2">
                     Endereço
                   </label>
                   <input
@@ -277,7 +263,6 @@ export const ClientManagement: React.FC = () => {
                   <th scope="col" className="px-6 py-4 font-semibold">Nome</th>
                   <th scope="col" className="px-6 py-4 font-semibold">Email</th>
                   <th scope="col" className="px-6 py-4 font-semibold">Telefone</th>
-                  <th scope="col" className="px-6 py-4 font-semibold">CPF/CNPJ</th>
                   <th scope="col" className="px-6 py-4 font-semibold text-center">Ações</th>
                 </tr>
               </thead>
@@ -295,7 +280,6 @@ export const ClientManagement: React.FC = () => {
                     </td>
                     <td className="px-6 py-4">{client.email || '-'}</td>
                     <td className="px-6 py-4">{client.phone || '-'}</td>
-                    <td className="px-6 py-4">{client.document || '-'}</td>
                     <td className="px-6 py-4">
                       <div className="flex justify-center space-x-2">
                         <button
