@@ -1,5 +1,26 @@
 @import "tailwindcss";
 
+:root {
+  color-scheme: light;
+  background-color: #f8fafc;
+  color: #0f172a;
+}
+
+html,
+body {
+  background-color: #f8fafc;
+  color: #0f172a;
+}
+
+html.dark {
+  color-scheme: dark;
+}
+
+html.dark body {
+  background-color: #0f172a;
+  color: #e2e8f0;
+}
+
 @theme {
   /* Ice theme colors - light blue/cyan tones */
   --color-ice-50: #f0f9ff;

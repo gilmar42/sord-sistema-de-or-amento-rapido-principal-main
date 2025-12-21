@@ -356,7 +356,7 @@ export const QuoteCalculator: React.FC<QuoteCalculatorProps> = ({ quoteToEdit, s
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div className="lg:col-span-2 space-y-6">
                 {/* Itens do Orçamento */}
-                <div className="bg-surface dark:bg-slate-800 p-6 rounded-lg shadow-md hover-lift card-hover animate-slide-in-left">
+                <div className="bg-white dark:bg-slate-800 p-6 rounded-lg shadow-md hover-lift card-hover animate-slide-in-left">
                     <div className="flex justify-between items-center mb-4">
                         <h3 className="text-lg font-semibold text-textPrimary dark:text-white flex items-center">
                             <DocumentTextIcon className="w-5 h-5 mr-2 text-blue-600" />
@@ -472,7 +472,7 @@ export const QuoteCalculator: React.FC<QuoteCalculatorProps> = ({ quoteToEdit, s
                 </div>
 
                 {/* Custos Adicionais */}
-                <div className="bg-surface dark:bg-slate-800 p-6 rounded-lg shadow-md hover-lift card-hover animate-slide-in-right">
+                <div className="bg-white dark:bg-slate-800 p-6 rounded-lg shadow-md hover-lift card-hover animate-slide-in-right">
                      <h3 className="text-lg font-semibold text-textPrimary dark:text-white mb-4 flex items-center">
                         <CogIcon className="w-5 h-5 mr-2 text-blue-600" />
                         Custos e Margem

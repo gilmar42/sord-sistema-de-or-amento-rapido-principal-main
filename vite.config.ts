@@ -12,11 +12,13 @@ export default defineConfig(({ mode }) => {
       server: {
         port: 3000,
         host: '0.0.0.0',
+        strictPort: false,
       },
       plugins: [
         react(),
         tailwindcss(),
       ],
+      clearScreen: false,
       build: {
         target: 'es2020',
         minify: 'terser',

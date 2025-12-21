@@ -69,10 +69,10 @@ export const SavedQuotes: React.FC<SavedQuotesProps> = ({ onEditQuote }) => {
   return (
     <div className="container mx-auto">
       <h2 className="text-2xl font-bold text-textPrimary dark:text-white mb-6">Orçamentos Salvos</h2>
-      <div className="bg-surface dark:bg-slate-800 p-6 rounded-lg shadow-md">
+      <div className="bg-white dark:bg-slate-800 p-6 rounded-lg shadow-md">
         <div className="overflow-x-auto">
           <table className="w-full text-sm text-left text-textSecondary dark:text-slate-300">
-            <thead className="text-xs text-gray-300 dark:text-slate-200 uppercase bg-surface-light dark:bg-slate-700">
+            <thead className="text-xs text-gray-700 dark:text-slate-200 uppercase bg-gray-100 dark:bg-slate-700">
               <tr>
                 <th scope="col" className="px-6 py-3">Nº Orçamento</th>
                 <th scope="col" className="px-6 py-3">Cliente</th>
@@ -83,7 +83,7 @@ export const SavedQuotes: React.FC<SavedQuotesProps> = ({ onEditQuote }) => {
             </thead>
             <tbody>
               {quotes.length > 0 ? quotes.sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime()).map(quote => (
-                <tr key={quote.id} className="border-b border-gray-700 dark:border-slate-600 hover:bg-surface-light dark:hover:bg-slate-700">
+                <tr key={quote.id} className="border-b border-gray-200 dark:border-slate-600 hover:bg-gray-50 dark:hover:bg-slate-700">
                   <td className="px-6 py-4 font-medium text-textPrimary dark:text-white">{quote.id}</td>
                   <td className="px-6 py-4">{quote.clientName || 'N/A'}</td>
                   <td className="px-6 py-4">{new Date(quote.date).toLocaleDateString('pt-BR')}</td>

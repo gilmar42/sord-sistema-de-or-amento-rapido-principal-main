@@ -1,6 +1,6 @@
-import React, { createContext, useContext, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, ReactNode } from 'react';
 
-export type ThemeMode = 'corporate-dark';
+export type ThemeMode = 'corporate-dark' | 'corporate-light';
 
 interface ThemeContextType {
   theme: ThemeMode;
@@ -9,13 +9,8 @@ interface ThemeContextType {
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export const ThemeProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const theme: ThemeMode = 'corporate-dark';
-
-  useEffect(() => {
-    const root = window.document.documentElement;
-    root.classList.add('dark');
-    localStorage.setItem('themeMode', theme);
-  }, [theme]);
+  // Removido o useEffect que forçava 'dark' - o useDarkMode gerencia isso
+  const theme: ThemeMode = 'corporate-light';
 
   return (
     <ThemeContext.Provider value={{ theme }}>

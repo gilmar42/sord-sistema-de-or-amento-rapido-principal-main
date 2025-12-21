@@ -61,7 +61,7 @@ export const Settings: React.FC = () => {
   return (
     <div className="container mx-auto max-w-2xl">
       <h2 className="text-2xl font-bold text-textPrimary dark:text-white mb-6">Configurações da Empresa</h2>
-      <div className="bg-surface dark:bg-slate-800 p-6 rounded-lg shadow-md space-y-6">
+      <div className="bg-white dark:bg-slate-800 p-6 rounded-lg shadow-md space-y-6">
         <div>
           <label className="block text-sm font-medium text-textSecondary dark:text-slate-300 mb-1">Nome da Empresa</label>
           <input 
@@ -69,7 +69,7 @@ export const Settings: React.FC = () => {
             name="companyName"
             value={localSettings.companyName}
             onChange={handleInputChange}
-            className="block w-full px-3 py-2 border border-gray-600 dark:border-slate-600 bg-gray-700 dark:bg-slate-700 text-textPrimary dark:text-white rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary sm:text-sm"
+            className="block w-full px-3 py-2 border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-white rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary sm:text-sm"
           />
         </div>
         <div>
@@ -79,7 +79,7 @@ export const Settings: React.FC = () => {
             value={localSettings.companyContact}
             onChange={handleInputChange}
             rows={3}
-            className="block w-full px-3 py-2 border border-gray-600 dark:border-slate-600 bg-gray-700 dark:bg-slate-700 text-textPrimary dark:text-white rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary sm:text-sm"
+            className="block w-full px-3 py-2 border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-white rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary sm:text-sm"
             placeholder="Ex: Telefone, E-mail, Endereço"
           />
         </div>
@@ -99,7 +99,7 @@ export const Settings: React.FC = () => {
                 {showSuccess ? 'Salvo com Sucesso!' : 'Salvar Configurações'}
             </button>
           <div className="flex items-center space-x-3">
-            <button onClick={handleMigrateLocalStorage} className="px-4 py-2 bg-gray-700 dark:bg-slate-700 text-white rounded-md hover:bg-gray-600 dark:hover:bg-slate-600 transition-colors">Migrar dados locais</button>
+            <button onClick={handleMigrateLocalStorage} className="px-4 py-2 bg-blue-600 dark:bg-slate-700 text-white rounded-md hover:bg-blue-700 dark:hover:bg-slate-600 transition-colors">Migrar dados locais</button>
             {migrateStatus ? <span className="text-sm text-textSecondary dark:text-slate-300">{migrateStatus}</span> : null}
           </div>
         </div>
