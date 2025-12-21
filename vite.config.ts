@@ -12,11 +12,6 @@ export default defineConfig(({ mode }) => {
       server: {
         port: 3000,
         host: '0.0.0.0',
-        // Forçar tipo MIME para arquivos .tsx e .ts
-        mimeTypes: {
-          '.tsx': 'application/javascript',
-          '.ts': 'application/javascript',
-        },
       },
       plugins: [
         react(),
@@ -26,6 +21,7 @@ export default defineConfig(({ mode }) => {
         target: 'es2020',
         minify: 'terser',
         cssMinify: true,
+          outDir: '../dist',
         rollupOptions: {
           output: {
             manualChunks: {
@@ -44,7 +40,8 @@ export default defineConfig(({ mode }) => {
       },
       resolve: {
         alias: {
-          '@': path.resolve(__dirname, '.'),
+            // Map '@' to the project src directory without relying on __dirname (ESM safe)
+            '@': path.resolve(process.cwd(), 'src'),
         }
       }
     };

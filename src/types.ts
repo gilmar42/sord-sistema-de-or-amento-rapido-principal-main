@@ -58,6 +58,7 @@ export interface Quote {
   // Hora Máquina
   machineHours?: number;
   machineHourlyRate?: number;
+  numberOfMachines?: number;
 }
 
 export interface AppSettings {

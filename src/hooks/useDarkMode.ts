@@ -7,8 +7,11 @@ export const useDarkMode = () => {
     if (stored !== null) {
       return stored === 'true';
     }
-    // Default to system preference
-    return window.matchMedia('(prefers-color-scheme: dark)').matches;
+    // Default to system preference (guarded for test/SSR environments)
+    if (typeof window !== 'undefined' && typeof window.matchMedia === 'function') {
+      return window.matchMedia('(prefers-color-scheme: dark)').matches;
+    }
+    return false;
   });
 
   useEffect(() => {

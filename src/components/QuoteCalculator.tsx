@@ -47,6 +47,7 @@ export const QuoteCalculator: React.FC<QuoteCalculatorProps> = ({ quoteToEdit, s
   // Hora Máquina
   const [machineHours, setMachineHours] = useState(0);
   const [machineHourlyRate, setMachineHourlyRate] = useState(0);
+    const [numberOfMachines, setNumberOfMachines] = useState(1);
   
   const [currentQuoteId, setCurrentQuoteId] = useState<string | null>(quoteToEdit?.id || null);
     const [pdfBlob, setPdfBlob] = useState<Blob | null>(null);
@@ -98,6 +99,7 @@ export const QuoteCalculator: React.FC<QuoteCalculatorProps> = ({ quoteToEdit, s
     setNumberOfWorkers(1);
     setMachineHours(0);
     setMachineHourlyRate(0);
+        setNumberOfMachines(1);
   };
 
   const calculated: CalculatedCosts = useMemo(() => {
@@ -131,7 +133,7 @@ export const QuoteCalculator: React.FC<QuoteCalculatorProps> = ({ quoteToEdit, s
     
     // Calcular custos de hora homem e hora máquina
     const laborCost = laborHours * laborHourlyRate * numberOfWorkers;
-    const machineCost = machineHours * machineHourlyRate;
+    const machineCost = machineHours * machineHourlyRate * numberOfMachines;
     
     const totalProjectCost = materialCost + totalManufacturingCost + laborCost + machineCost + (isFreightEnabled ? freightCost : 0);
     const profitValue = totalProjectCost * (profitMargin / 100);
@@ -157,7 +159,7 @@ export const QuoteCalculator: React.FC<QuoteCalculatorProps> = ({ quoteToEdit, s
       laborCost,
       machineCost,
     };
-  }, [items, freightCost, profitMargin, materials, isFreightEnabled, laborHours, laborHourlyRate, numberOfWorkers, machineHours, machineHourlyRate]);
+    }, [items, freightCost, profitMargin, materials, isFreightEnabled, laborHours, laborHourlyRate, numberOfWorkers, machineHours, machineHourlyRate, numberOfMachines]);
 
   const handleAddItem = useCallback((material: Material) => {
     console.log('===== handleAddItem chamado =====');
@@ -216,6 +218,7 @@ export const QuoteCalculator: React.FC<QuoteCalculatorProps> = ({ quoteToEdit, s
         numberOfWorkers,
         machineHours,
         machineHourlyRate,
+        numberOfMachines,
     };
     
     console.log('Quote data preparado:', quoteData);
@@ -385,7 +388,7 @@ export const QuoteCalculator: React.FC<QuoteCalculatorProps> = ({ quoteToEdit, s
                                 className="flex items-center px-4 py-2 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg hover:shadow-lg hover:from-blue-700 hover:to-blue-800 transition-all duration-200"
                             >
                                 <PlusIcon className="w-4 h-4 mr-2"/>
-                                Adicionar Item
+                                Adicionar Material
                             </button>
                         )}
                     </div>
@@ -611,7 +614,21 @@ export const QuoteCalculator: React.FC<QuoteCalculatorProps> = ({ quoteToEdit, s
                                 <span className="w-2 h-2 bg-purple-500 rounded-full mr-2"></span>
                                 Hora Máquina
                             </h3>
-                            <div className="grid grid-cols-2 gap-3">
+                            <div className="grid grid-cols-3 gap-3">
+                                <div>
+                                    <label className="block text-xs font-medium text-gray-600 dark:text-slate-400 mb-1">
+                                        Qtd. Máquinas
+                                    </label>
+                                    <input 
+                                        type="number"
+                                        value={numberOfMachines}
+                                        onChange={e => setNumberOfMachines(parseInt(e.target.value) || 1)}
+                                        placeholder="1"
+                                        className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-textPrimary dark:text-white rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-shadow text-sm shadow-sm"
+                                        min="1"
+                                        step="1"
+                                    />
+                                </div>
                                 <div>
                                     <label className="block text-xs font-medium text-gray-600 dark:text-slate-400 mb-1">
                                         Horas
@@ -626,7 +643,6 @@ export const QuoteCalculator: React.FC<QuoteCalculatorProps> = ({ quoteToEdit, s
                                         step="0.5"
                                     />
                                 </div>
-                                
                                 <div>
                                     <label className="block text-xs font-medium text-gray-600 dark:text-slate-400 mb-1">
                                         Valor/Hora (R$)
@@ -683,7 +699,14 @@ export const QuoteCalculator: React.FC<QuoteCalculatorProps> = ({ quoteToEdit, s
                         </div>
                         
                         <div className="flex justify-between items-center py-2 px-3 bg-purple-50 dark:bg-purple-900/20 rounded-lg border border-purple-100 dark:border-purple-800">
-                            <span className="text-gray-700 dark:text-slate-300 font-medium">Hora Máquina</span>
+                            <div>
+                                <span className="text-gray-700 dark:text-slate-300 font-medium">Hora Máquina</span>
+                                {(numberOfMachines > 1 || machineHours > 0) && (
+                                    <div className="text-xs text-gray-500 dark:text-slate-500 mt-0.5">
+                                        {numberOfMachines} máquinas × {machineHours}h × R$ {machineHourlyRate.toFixed(2)}/h
+                                    </div>
+                                )}
+                            </div>
                             <span className="font-semibold text-purple-700 dark:text-purple-400">R$ {calculated.machineCost.toFixed(2)}</span>
                         </div>
                         

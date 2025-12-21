@@ -100,7 +100,11 @@ export const generateQuotePDF = (quote: Quote, materials: Material[], settings: 
   }
   
   if (calculated.machineCost > 0) {
-    doc.text(`Custo Hora Máquina: R$ ${calculated.machineCost.toFixed(2)} (${quote.machineHours || 0}h × R$ ${quote.machineHourlyRate || 0}/h)`, 15, summaryY);
+    const machines = (quote as Quote).numberOfMachines || 1;
+    const machineDetail = machines > 1
+      ? `${machines} máquinas × ${quote.machineHours || 0}h × R$ ${quote.machineHourlyRate || 0}/h`
+      : `${quote.machineHours || 0}h × R$ ${quote.machineHourlyRate || 0}/h`;
+    doc.text(`Custo Hora Máquina: R$ ${calculated.machineCost.toFixed(2)} (${machineDetail})`, 15, summaryY);
     summaryY += 7;
   }
   
