@@ -1,37 +1,47 @@
-import { Request, Response } from 'express';
-import mercadoPagoService from '../services/mercadoPagoService.js';
-import db from '../db/connection.js';
-import Joi from 'joi';
+/**
+ * Payment Controller
+ * Endpoints para gerenciar pagamentos
+ */
 
-// Schema de validação
-const paymentSchema = Joi.object({
-  orderId: Joi.string().required(),
-  amount: Joi.number().positive().required(),
-  token: Joi.string().required(),
-  paymentMethodId: Joi.string().required(),
-  installments: Joi.number().integer().min(1).required(),
-  email: Joi.string().email().required(),
-  description: Joi.string().required(),
-  issuerId: Joi.string().optional(),
-  metadata: Joi.object().optional(),
-});
+import { Response } from 'express';
+import { AuthRequest } from '../utils/auth';
+import paymentService from '../services/paymentService.js';
+import logger from '../utils/logger.js';
 
-export const createPayment = async (req: Request, res: Response) => {
+/**
+ * POST /api/payments
+ * Criar novo pagamento
+ */
+export const createPayment = async (req: AuthRequest, res: Response) => {
   try {
-    // Validação
-    const { error, value } = paymentSchema.validate(req.body);
-    if (error) {
+    const { orderId, amount, email, description, token, paymentMethodId, installments, issuerId } = req.body;
+    const tenantId = req.user?.tenantId;
+    const ipAddress = req.ip || req.socket.remoteAddress;
+
+    // Validações básicas
+    if (!orderId || !amount || !email || !description || !token || !paymentMethodId || !installments) {
       return res.status(400).json({
         success: false,
-        error: error.details[0].message,
+        error: 'Campos obrigatórios: orderId, amount, email, description, token, paymentMethodId, installments',
       });
     }
 
-    const ipAddress = req.ip || req.socket.remoteAddress;
+    logger.info('Iniciando processamento de pagamento', {
+      orderId,
+      amount,
+      email,
+    });
 
-    // Processar pagamento
-    const result = await mercadoPagoService.processPayment({
-      ...value,
+    const result = await paymentService.processPayment({
+      orderId,
+      amount,
+      email,
+      description,
+      token,
+      paymentMethodId,
+      installments,
+      issuerId,
+      tenantId: tenantId || 'unknown',
       ipAddress,
     });
 
@@ -44,85 +54,76 @@ export const createPayment = async (req: Request, res: Response) => {
 
     res.status(201).json({
       success: true,
-      payment: result.data,
+      data: result.data,
     });
   } catch (error: any) {
-    console.error('Erro ao processar pagamento:', error);
+    logger.error('Erro ao criar pagamento', {
+      error: error.message,
+    });
+
     res.status(500).json({
       success: false,
-      error: 'Erro ao processar pagamento',
+      error: 'Erro ao processar pagamento. Tente novamente.',
     });
   }
 };
 
-export const getPaymentStatus = async (req: Request, res: Response) => {
+/**
+ * GET /api/payments/:orderId
+ * Obter status de um pagamento
+ */
+export const getPaymentStatus = async (req: AuthRequest, res: Response) => {
   try {
     const { orderId } = req.params;
+    const tenantId = req.user?.tenantId;
 
-    const dbResult = await db.query(
-      'SELECT * FROM payments WHERE order_id = $1',
-      [orderId]
-    );
-
-    if (dbResult.rows.length === 0) {
-      return res.status(404).json({
+    if (!orderId) {
+      return res.status(400).json({
         success: false,
-        error: 'Pagamento não encontrado',
+        error: 'orderId é obrigatório',
       });
     }
 
-    const payment = dbResult.rows[0];
-    res.json({
-      success: true,
-      payment: {
-        orderId: payment.order_id,
-        amount: payment.amount,
-        status: payment.status,
-        statusDetail: payment.status_detail,
-        createdAt: payment.created_at,
-        processedAt: payment.processed_at,
-      },
-    });
+    const result = await paymentService.getPaymentStatus(orderId, tenantId || 'unknown');
+
+    if (!result.success) {
+      return res.status(404).json(result);
+    }
+
+    res.json(result);
   } catch (error: any) {
-    console.error('Erro ao buscar status do pagamento:', error);
+    logger.error('Erro ao obter status do pagamento', {
+      error: error.message,
+    });
+
     res.status(500).json({
       success: false,
-      error: 'Erro ao buscar status do pagamento',
+      error: 'Erro ao obter status do pagamento',
     });
   }
 };
 
-export const listPayments = async (req: Request, res: Response) => {
+/**
+ * GET /api/payments
+ * Listar pagamentos com filtros
+ */
+export const listPayments = async (req: AuthRequest, res: Response) => {
   try {
-    const { status, limit = 20, offset = 0 } = req.query;
+    const tenantId = req.user?.tenantId;
+    const { status, limit, offset } = req.query;
 
-    let query = 'SELECT * FROM payments WHERE 1=1';
-    const params: any[] = [];
-
-    if (status) {
-      query += ' AND status = $' + (params.length + 1);
-      params.push(status);
-    }
-
-    query += ' ORDER BY created_at DESC LIMIT $' + (params.length + 1) + ' OFFSET $' + (params.length + 2);
-    params.push(limit, offset);
-
-    const result = await db.query(query, params);
-
-    res.json({
-      success: true,
-      payments: result.rows.map((p: any) => ({
-        orderId: p.order_id,
-        amount: p.amount,
-        status: p.status,
-        statusDetail: p.status_detail,
-        email: p.payer_email,
-        createdAt: p.created_at,
-      })),
-      total: result.rows.length,
+    const result = await paymentService.listPayments(tenantId || 'unknown', {
+      status: status as string,
+      limit: limit ? parseInt(limit as string) : 20,
+      offset: offset ? parseInt(offset as string) : 0,
     });
+
+    res.json(result);
   } catch (error: any) {
-    console.error('Erro ao listar pagamentos:', error);
+    logger.error('Erro ao listar pagamentos', {
+      error: error.message,
+    });
+
     res.status(500).json({
       success: false,
       error: 'Erro ao listar pagamentos',

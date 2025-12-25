@@ -1,6 +1,20 @@
 import { MercadoPagoConfig, Payment } from 'mercadopago';
-import db from '../db/connection.js';
+import { Payment as PaymentModel } from '../db/models.js';
 import { v4 as uuidv4 } from 'uuid';
+
+// Validação crítica: token deve existir em produção
+if (!process.env.MERCADO_PAGO_ACCESS_TOKEN) {
+  console.error('❌ ERRO CRÍTICO: MERCADO_PAGO_ACCESS_TOKEN não configurado');
+  if (process.env.NODE_ENV === 'production') {
+    throw new Error('MERCADO_PAGO_ACCESS_TOKEN é obrigatório em produção');
+  }
+}
+
+// Avisar sobre token de teste em produção
+if (process.env.NODE_ENV === 'production' && 
+    process.env.MERCADO_PAGO_ACCESS_TOKEN?.startsWith('TEST-')) {
+  console.warn('⚠️  AVISO: Token de TESTE detectado em ambiente de PRODUÇÃO');
+}
 
 const client = new MercadoPagoConfig({
   accessToken: process.env.MERCADO_PAGO_ACCESS_TOKEN || '',
@@ -19,6 +33,7 @@ interface PaymentRequest {
   issuerId?: string;
   metadata?: any;
   ipAddress?: string;
+  tenantId?: string;
 }
 
 interface PaymentResponse {
@@ -29,7 +44,12 @@ interface PaymentResponse {
 
 export class MercadoPagoService {
   async processPayment(req: PaymentRequest): Promise<PaymentResponse> {
+    const startTime = Date.now();
+    
     try {
+      // Validações de entrada
+      this.validatePaymentRequest(req);
+
       const idempotencyKey = `${req.orderId}-${Date.now()}`;
 
       const body = {
@@ -48,36 +68,28 @@ export class MercadoPagoService {
         },
       };
 
+      console.log(`[MercadoPago] Processando pagamento ${req.orderId} - R$ ${req.amount}`);
+
       const requestOptions = { idempotencyKey };
       const result = await payment.create({ body, requestOptions });
 
-      // Salvar pagamento no banco de dados
-      const paymentData = {
-        order_id: req.orderId,
+      const duration = Date.now() - startTime;
+      console.log(`[MercadoPago] Pagamento ${req.orderId} processado em ${duration}ms - Status: ${result.status}`);
+
+      // Salvar pagamento no MongoDB
+      await this.savePayment({
+        paymentId: result.id?.toString() || uuidv4(),
+        orderId: req.orderId,
+        status: result.status || 'pending',
         amount: req.amount,
-        payment_method_id: req.paymentMethodId,
-        payment_method_type: result.payment_method?.type,
-        status: result.status,
-        status_detail: result.status_detail,
-        mercado_pago_id: result.id,
-        payer_email: req.email,
         description: req.description,
+        paymentMethod: req.paymentMethodId,
         installments: req.installments,
-        issuer_id: req.issuerId,
-        card_last_four: result.card?.last_four_digits,
-        metadata: JSON.stringify(result),
-      };
-
-      await this.savePayment(paymentData);
-
-      // Log de auditoria
-      await this.logPaymentEvent({
-        payment_id: paymentData.order_id,
-        event_type: 'payment_processed',
-        status_after: result.status,
-        request_body: JSON.stringify(body),
-        response_body: JSON.stringify(result),
-        ip_address: req.ipAddress,
+        payer: {
+          email: req.email,
+        },
+        tenantId: req.tenantId,
+        metadata: result,
       });
 
       return {
@@ -91,73 +103,68 @@ export class MercadoPagoService {
         },
       };
     } catch (error: any) {
+      console.error(`[MercadoPago] Erro ao processar pagamento ${req.orderId}:`, {
+        message: error.message,
+        cause: error.cause,
+        status: error.status,
+        orderId: req.orderId,
+      });
+
       return {
         success: false,
-        error: error.message,
+        error: this.getErrorMessage(error),
       };
     }
   }
 
-  async savePayment(data: any) {
-    const query = `
-      INSERT INTO payments (
-        order_id, amount, payment_method_id, payment_method_type,
-        status, status_detail, mercado_pago_id, payer_email,
-        description, installments, issuer_id, card_last_four, metadata
-      ) VALUES (
-        $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13
-      )
-      ON CONFLICT (order_id) DO UPDATE SET
-        status = $5,
-        updated_at = CURRENT_TIMESTAMP,
-        mercado_pago_id = $7,
-        metadata = $13
-    `;
-
-    await db.query(query, [
-      data.order_id,
-      data.amount,
-      data.payment_method_id,
-      data.payment_method_type,
-      data.status,
-      data.status_detail,
-      data.mercado_pago_id,
-      data.payer_email,
-      data.description,
-      data.installments,
-      data.issuer_id,
-      data.card_last_four,
-      data.metadata,
-    ]);
+  private validatePaymentRequest(req: PaymentRequest): void {
+    if (!req.orderId) throw new Error('orderId é obrigatório');
+    if (!req.amount || req.amount <= 0) throw new Error('amount deve ser maior que zero');
+    if (!req.token) throw new Error('token é obrigatório');
+    if (!req.paymentMethodId) throw new Error('paymentMethodId é obrigatório');
+    if (!req.email) throw new Error('email é obrigatório');
+    if (!req.description) throw new Error('description é obrigatória');
+    
+    // Validar formato de email
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(req.email)) {
+      throw new Error('email inválido');
+    }
   }
 
-  async logPaymentEvent(data: any) {
-    const paymentIdResult = await db.query(
-      'SELECT id FROM payments WHERE order_id = $1',
-      [data.payment_id]
-    );
+  private getErrorMessage(error: any): string {
+    // Mapear erros comuns do Mercado Pago
+    if (error.message?.includes('invalid_token')) {
+      return 'Token de pagamento inválido. Por favor, tente novamente.';
+    }
+    if (error.message?.includes('card_disabled')) {
+      return 'Cartão desabilitado. Use outro cartão.';
+    }
+    if (error.message?.includes('insufficient_amount')) {
+      return 'Saldo insuficiente.';
+    }
+    if (error.message?.includes('timeout')) {
+      return 'Tempo de processamento excedido. Tente novamente.';
+    }
+    return error.message || 'Erro ao processar pagamento';
+  }
 
-    if (paymentIdResult.rows.length === 0) return;
-
-    const query = `
-      INSERT INTO payment_logs (
-        payment_id, event_type, status_after, request_body, response_body, ip_address
-      ) VALUES ($1, $2, $3, $4, $5, $6)
-    `;
-
-    await db.query(query, [
-      paymentIdResult.rows[0].id,
-      data.event_type,
-      data.status_after,
-      data.request_body,
-      data.response_body,
-      data.ip_address,
-    ]);
+  async savePayment(data: any) {
+    try {
+      const paymentDoc = new PaymentModel(data);
+      await paymentDoc.save();
+      console.log(`[MongoDB] Pagamento salvo: ${data.orderId}`);
+    } catch (error: any) {
+      console.error('[MongoDB] Erro ao salvar pagamento:', error.message);
+      // Não lançar erro para não falhar o pagamento
+    }
   }
 
   async getPaymentStatus(paymentId: string) {
     try {
+      console.log(`[MercadoPago] Consultando status do pagamento ${paymentId}`);
       const result = await payment.get({ id: paymentId });
+      
       return {
         success: true,
         data: {
@@ -168,9 +175,10 @@ export class MercadoPagoService {
         },
       };
     } catch (error: any) {
+      console.error(`[MercadoPago] Erro ao consultar pagamento ${paymentId}:`, error.message);
       return {
         success: false,
-        error: error.message,
+        error: this.getErrorMessage(error),
       };
     }
   }

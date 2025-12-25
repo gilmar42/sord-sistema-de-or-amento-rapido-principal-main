@@ -1,19 +1,31 @@
-import pkg from 'pg';
-const { Pool } = pkg;
+import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 
 dotenv.config();
 
-export const db = new Pool({
-  host: process.env.DB_HOST,
-  port: parseInt(process.env.DB_PORT || '5432'),
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-  database: process.env.DB_NAME,
+const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/sord_db';
+
+export const connectDB = async (): Promise<void> => {
+  try {
+    await mongoose.connect(MONGODB_URI);
+    console.log('✅ Conectado ao MongoDB');
+    console.log(`   Database: ${mongoose.connection.name}`);
+  } catch (error) {
+    console.error('❌ Erro ao conectar ao MongoDB:', error);
+    throw error;
+  }
+};
+
+mongoose.connection.on('error', (err) => {
+  console.error('❌ Erro na conexão MongoDB:', err);
 });
 
-db.on('error', (err) => {
-  console.error('Erro no pool PostgreSQL:', err);
+mongoose.connection.on('disconnected', () => {
+  console.warn('⚠️  MongoDB desconectado');
 });
 
-export default db;
+mongoose.connection.on('reconnected', () => {
+  console.log('✅ MongoDB reconectado');
+});
+
+export default mongoose;

@@ -8,9 +8,9 @@ export default defineConfig(({ mode }) => {
     const isProd = mode === 'production';
 
     return {
-      root: 'src',
+      root: 'sored-novo',
       server: {
-        port: 3000,
+        port: 5173,
         host: '0.0.0.0',
         strictPort: false,
       },
@@ -23,7 +23,7 @@ export default defineConfig(({ mode }) => {
         target: 'es2020',
         minify: 'terser',
         cssMinify: true,
-          outDir: '../dist',
+        outDir: '../dist',
         rollupOptions: {
           output: {
             manualChunks: {
@@ -42,8 +42,7 @@ export default defineConfig(({ mode }) => {
       },
       resolve: {
         alias: {
-            // Map '@' to the project src directory without relying on __dirname (ESM safe)
-            '@': path.resolve(process.cwd(), 'src'),
+            '@': path.resolve(process.cwd(), 'sored-novo/src'),
         }
       }
     };

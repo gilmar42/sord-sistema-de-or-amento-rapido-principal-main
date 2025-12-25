@@ -4,8 +4,12 @@ import {
   getPaymentStatus,
   listPayments,
 } from '../controllers/paymentController.js';
+import { authMiddleware } from '../utils/auth.js';
 
 const router = express.Router();
+
+// Todas as rotas de pagamento requerem autenticação
+router.use(authMiddleware);
 
 // POST /api/payments - Criar pagamento
 router.post('/', createPayment);
