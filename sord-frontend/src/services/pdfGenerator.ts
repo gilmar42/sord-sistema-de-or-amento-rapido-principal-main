@@ -2,6 +2,11 @@ import type { Quote, Material, AppSettings, CalculatedCosts } from '../types';
 
 // These are expected to be available in the global scope from the scripts in index.html
 declare const jspdf: any;
+declare global {
+  interface Window {
+    jspdf: any;
+  }
+}
 
 // Fix: Redefined the interface to include all used methods from jspdf and jspdf-autotable
 // This avoids the 'Cannot find namespace' error and subsequent property errors.
@@ -17,7 +22,14 @@ interface jsPDFWithAutoTable {
 }
 
 export const generateQuotePDF = (quote: Quote, materials: Material[], settings: AppSettings, calculated: CalculatedCosts): Blob | string => {
-  const { jsPDF } = jspdf;
+  // Verificar se jsPDF está disponível
+  const jspdfLib = typeof jspdf !== 'undefined' ? jspdf : window.jspdf;
+  
+  if (!jspdfLib || !jspdfLib.jsPDF) {
+    throw new Error('Biblioteca jsPDF não está carregada. Recarregue a página (Ctrl+F5) e tente novamente.');
+  }
+  
+  const { jsPDF } = jspdfLib;
   const doc = new jsPDF() as jsPDFWithAutoTable;
 
   const getMaterialById = (id: string) => materials.find(m => m.id === id);
@@ -88,13 +100,21 @@ export const generateQuotePDF = (quote: Quote, materials: Material[], settings: 
   doc.text(`Custos Fixos de Fabricação: R$ ${quote.laborCost.toFixed(2)}`, 15, summaryY);
   summaryY += 7;
   
+  const manCount = quote.manCount ?? 1;
+
   if (quote.manHours && quote.manHours > 0) {
-    doc.text(`Hora Homem: ${quote.manHours}h × R$ ${quote.manHourRate.toFixed(2)} = R$ ${(quote.manHours * quote.manHourRate).toFixed(2)}`, 15, summaryY);
+    const manRate = quote.manHourRate ?? 0;
+    const totalManCost = manCount * quote.manHours * manRate;
+    doc.text(`Hora Homem: ${manCount}×${quote.manHours}h × R$ ${manRate.toFixed(2)} = R$ ${totalManCost.toFixed(2)}`, 15, summaryY);
     summaryY += 7;
   }
   
+  const machineCount = quote.machineCount ?? 1;
+
   if (quote.machineHours && quote.machineHours > 0) {
-    doc.text(`Hora Máquina: ${quote.machineHours}h × R$ ${quote.machineHourRate.toFixed(2)} = R$ ${(quote.machineHours * quote.machineHourRate).toFixed(2)}`, 15, summaryY);
+    const machRate = quote.machineHourRate ?? 0;
+    const totalMachCost = machineCount * quote.machineHours * machRate;
+    doc.text(`Hora Máquina: ${machineCount}×${quote.machineHours}h × R$ ${machRate.toFixed(2)} = R$ ${totalMachCost.toFixed(2)}`, 15, summaryY);
     summaryY += 7;
   }
   

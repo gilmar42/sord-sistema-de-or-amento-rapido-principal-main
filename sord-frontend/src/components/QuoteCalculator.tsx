@@ -21,11 +21,13 @@ export const QuoteCalculator: React.FC<QuoteCalculatorProps> = ({ quoteToEdit, s
   
   const [clientName, setClientName] = useState('');
   const [items, setItems] = useState<QuoteItem[]>([]);
-  const [laborCost, setLaborCost] = useState(0);
-    const [manHours, setManHours] = useState(0);
-    const [manHourRate, setManHourRate] = useState(0);
-    const [machineHours, setMachineHours] = useState(0);
-    const [machineHourRate, setMachineHourRate] = useState(0);
+    const [laborCost, setLaborCost] = useState(0);
+        const [manCount, setManCount] = useState(1);
+        const [manHours, setManHours] = useState(0);
+        const [manHourRate, setManHourRate] = useState(0);
+        const [machineCount, setMachineCount] = useState(1);
+        const [machineHours, setMachineHours] = useState(0);
+        const [machineHourRate, setMachineHourRate] = useState(0);
   const [freightCost, setFreightCost] = useState(0);
   const [profitMargin, setProfitMargin] = useState(20);
   const [isFreightEnabled, setIsFreightEnabled] = useState(false);
@@ -40,16 +42,20 @@ export const QuoteCalculator: React.FC<QuoteCalculatorProps> = ({ quoteToEdit, s
     if (quoteToEdit) {
       console.log('[QuoteCalculator] Loading quoteToEdit:', quoteToEdit);
       console.log('[QuoteCalculator] Hour values from quote:', { 
+        manCount: quoteToEdit.manCount,
         manHours: quoteToEdit.manHours, 
         manHourRate: quoteToEdit.manHourRate,
-        machineHours: quoteToEdit.machineHours,
-        machineHourRate: quoteToEdit.machineHourRate
+                machineCount: quoteToEdit.machineCount,
+                machineHours: quoteToEdit.machineHours,
+                machineHourRate: quoteToEdit.machineHourRate
       });
       setClientName(quoteToEdit.clientName);
       setItems(quoteToEdit.items || []);
       setLaborCost(quoteToEdit.laborCost);
+    setManCount(quoteToEdit.manCount ?? 1);
     setManHours(quoteToEdit.manHours ?? 0);
     setManHourRate(quoteToEdit.manHourRate ?? 0);
+    setMachineCount(quoteToEdit.machineCount ?? 1);
     setMachineHours(quoteToEdit.machineHours ?? 0);
     setMachineHourRate(quoteToEdit.machineHourRate ?? 0);
       setFreightCost(quoteToEdit.freightCost);
@@ -72,12 +78,15 @@ export const QuoteCalculator: React.FC<QuoteCalculatorProps> = ({ quoteToEdit, s
     setClientName('');
     setItems([]);
     setLaborCost(0);
+    setManCount(1);
     setManHours(0);
     setManHourRate(0);
+    setMachineCount(1);
     setMachineHours(0);
     setMachineHourRate(0);
     setFreightCost(0);
     setProfitMargin(20);
+            machineCount,
     setIsFreightEnabled(false);
     setCurrentQuoteId(null);
     setQuoteToEdit(null);
@@ -89,7 +98,7 @@ export const QuoteCalculator: React.FC<QuoteCalculatorProps> = ({ quoteToEdit, s
       return acc + (material ? material.unitCost * item.quantity : 0);
     }, 0);
 
-        const hourBasedCost = (manHours * manHourRate) + (machineHours * machineHourRate);
+        const hourBasedCost = (manCount * manHours * manHourRate) + (machineCount * machineHours * machineHourRate);
         const laborIndirectCosts = laborCost + hourBasedCost;
         const totalProjectCost = materialCost + laborIndirectCosts + (isFreightEnabled ? freightCost : 0);
     const profitValue = totalProjectCost * (profitMargin / 100);
@@ -113,7 +122,7 @@ export const QuoteCalculator: React.FC<QuoteCalculatorProps> = ({ quoteToEdit, s
       finalValue,
       totalWeight,
     };
-  }, [items, laborCost, freightCost, profitMargin, materials, isFreightEnabled, manHours, manHourRate, machineHours, machineHourRate]);
+    }, [items, laborCost, freightCost, profitMargin, materials, isFreightEnabled, manCount, manHours, manHourRate, machineCount, machineHours, machineHourRate]);
 
   const handleAddItem = useCallback((material: Material) => {
         setIsModalOpen(false);
@@ -144,39 +153,50 @@ export const QuoteCalculator: React.FC<QuoteCalculatorProps> = ({ quoteToEdit, s
   const handleSaveQuote = () => {
         console.log('handleSaveQuote called', { clientName, items, laborCost, freightCost, profitMargin, currentQuoteId });
     console.log('[QuoteCalculator] Saving with hour values:', {
+            manCount,
       manHours,
       manHourRate,
       machineHours,
       machineHourRate,
-      hourBasedCost: (manHours * manHourRate) + (machineHours * machineHourRate)
+            hourBasedCost: (manCount * manHours * manHourRate) + (machineHours * machineHourRate)
     });
     const quoteData: Omit<Quote, 'id' | 'date'> = {
         clientName,
         items,
         laborCost,
+        manCount,
+        manCount,
         manHours,
-        manHourRate,
-        machineHours,
+            machineCount,
         machineHourRate,
         freightCost,
         profitMargin,
         isFreightEnabled,
     };
     
+    let savedQuoteId: string;
+    
     if (currentQuoteId) {
         // Update existing quote
         const updatedQuote: Quote = { ...quoteData, id: currentQuoteId, date: new Date().toISOString() };
         console.log('updating quote, calling setQuotes with updatedQuote', updatedQuote, 'existing quotes:', quotes);
         setQuotes(quotes.map(q => q.id === currentQuoteId ? updatedQuote : q));
+        savedQuoteId = currentQuoteId;
     } else {
         // Create new quote
         const newQuote: Quote = { ...quoteData, id: `Q-${Date.now()}`, date: new Date().toISOString() };
         console.log('creating new quote, calling setQuotes with newQuote', newQuote, 'existing quotes:', quotes);
         setQuotes([...quotes, newQuote]);
         setCurrentQuoteId(newQuote.id);
+        savedQuoteId = newQuote.id;
     }
 
     setShowSuccess(true);
+    
+    // Gerar PDF automaticamente após salvar
+    setTimeout(() => {
+      handleGeneratePDF();
+    }, 100);
   };
   
   const handleGeneratePDF = () => {
@@ -194,14 +214,20 @@ export const QuoteCalculator: React.FC<QuoteCalculatorProps> = ({ quoteToEdit, s
         profitMargin,
         isFreightEnabled
     };
-            const pdfResult = generateQuotePDF(quote, materials, settings, calculated);
-            if (pdfResult instanceof Blob) {
-                setPdfBlob(pdfResult);
-                setIsPdfModalOpen(true);
-            } else if (typeof pdfResult === 'string') {
-                // fallback for older environments where generator returns data URI
-                window.open(pdfResult, '_blank');
-            }
+    
+    try {
+        const pdfResult = generateQuotePDF(quote, materials, settings, calculated);
+        if (pdfResult instanceof Blob) {
+            setPdfBlob(pdfResult);
+            setIsPdfModalOpen(true);
+        } else if (typeof pdfResult === 'string') {
+            // fallback for older environments where generator returns data URI
+            window.open(pdfResult, '_blank');
+        }
+    } catch (error) {
+        console.error('Erro ao gerar PDF:', error);
+        alert('Erro ao gerar PDF. Verifique o console para mais detalhes.');
+    }
   };
 
   const handleWhatsAppShare = () => {
@@ -211,8 +237,10 @@ export const QuoteCalculator: React.FC<QuoteCalculatorProps> = ({ quoteToEdit, s
             clientName,
             items,
             laborCost,
+            manCount,
             manHours,
             manHourRate,
+            machineCount,
             machineHours,
             machineHourRate,
             freightCost,
@@ -328,13 +356,23 @@ export const QuoteCalculator: React.FC<QuoteCalculatorProps> = ({ quoteToEdit, s
                                 className="block w-full px-3 py-2 border border-gray-600 bg-gray-700 text-textPrimary rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary sm:text-sm"
                             />
                         </div>
-                        <div className="grid grid-cols-2 gap-3 col-span-1 md:col-span-2">
+                        <div className="col-span-full grid grid-cols-1 sm:grid-cols-3 gap-3 items-end">
                             <div>
                                 <label className="block text-sm font-medium text-textSecondary mb-1">Horas Homem</label>
                                 <input 
                                     type="number"
                                     value={manHours}
                                     onChange={e => setManHours(parseFloat(e.target.value) || 0)}
+                                    className="block w-full px-3 py-2 border border-gray-600 bg-gray-700 text-textPrimary rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary sm:text-sm"
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-textSecondary mb-1">Qtd. de Homens</label>
+                                <input 
+                                    type="number"
+                                    min={0}
+                                    value={manCount}
+                                    onChange={e => setManCount(Math.max(0, parseFloat(e.target.value) || 0))}
                                     className="block w-full px-3 py-2 border border-gray-600 bg-gray-700 text-textPrimary rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary sm:text-sm"
                                 />
                             </div>
@@ -347,12 +385,25 @@ export const QuoteCalculator: React.FC<QuoteCalculatorProps> = ({ quoteToEdit, s
                                     className="block w-full px-3 py-2 border border-gray-600 bg-gray-700 text-textPrimary rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary sm:text-sm"
                                 />
                             </div>
+                        </div>
+
+                        <div className="col-span-full grid grid-cols-1 sm:grid-cols-3 gap-3 items-end">
                             <div>
                                 <label className="block text-sm font-medium text-textSecondary mb-1">Horas Máquina</label>
                                 <input 
                                     type="number"
                                     value={machineHours}
                                     onChange={e => setMachineHours(parseFloat(e.target.value) || 0)}
+                                    className="block w-full px-3 py-2 border border-gray-600 bg-gray-700 text-textPrimary rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary sm:text-sm"
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-textSecondary mb-1">Qtd. de Máquinas</label>
+                                <input 
+                                    type="number"
+                                    min={0}
+                                    value={machineCount}
+                                    onChange={e => setMachineCount(Math.max(0, parseFloat(e.target.value) || 0))}
                                     className="block w-full px-3 py-2 border border-gray-600 bg-gray-700 text-textPrimary rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary sm:text-sm"
                                 />
                             </div>
@@ -366,7 +417,7 @@ export const QuoteCalculator: React.FC<QuoteCalculatorProps> = ({ quoteToEdit, s
                                 />
                             </div>
                         </div>
-                        <div>
+                        <div className="col-span-1 md:col-span-2">
                             <label htmlFor="freightCost" className="block text-sm font-medium text-textSecondary mb-1">Custo de Frete (R$)</label>
                             <div className="flex items-center">
                                 <input 
@@ -374,11 +425,10 @@ export const QuoteCalculator: React.FC<QuoteCalculatorProps> = ({ quoteToEdit, s
                                     type="number"
                                     value={freightCost}
                                     onChange={e => setFreightCost(parseFloat(e.target.value))}
-                                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 text-textPrimary bg-bgSecondary"
+                                    className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 text-textPrimary bg-bgSecondary ${!isFreightEnabled ? 'opacity-70' : ''}`}
                                     placeholder="0.00"
-                                    disabled={!isFreightEnabled}
                                 />
-                                <label htmlFor="toggleFreight" className="flex items-center cursor-pointer ml-4">
+                                <label htmlFor="toggleFreight" className="flex items-center cursor-pointer ml-4 select-none">
                                     <div className="relative">
                                         <input
                                             type="checkbox"
@@ -386,9 +436,10 @@ export const QuoteCalculator: React.FC<QuoteCalculatorProps> = ({ quoteToEdit, s
                                             className="sr-only"
                                             checked={isFreightEnabled}
                                             onChange={() => setIsFreightEnabled(!isFreightEnabled)}
+                                            aria-checked={isFreightEnabled}
                                         />
-                                        <div className="block bg-gray-600 w-14 h-8 rounded-full"></div>
-                                        <div className="dot absolute left-1 top-1 bg-white w-6 h-6 rounded-full transition"></div>
+                                        <div className={`block w-14 h-8 rounded-full transition-colors ${isFreightEnabled ? 'bg-blue-600' : 'bg-gray-600'}`}></div>
+                                        <div className={`dot absolute left-1 top-1 w-6 h-6 rounded-full bg-white transition-transform ${isFreightEnabled ? 'translate-x-6' : ''}`}></div>
                                     </div>
                                     <div className="ml-3 text-textPrimary font-medium">
                                         {isFreightEnabled ? 'Frete Ativo' : 'Frete Inativo'}
@@ -415,11 +466,11 @@ export const QuoteCalculator: React.FC<QuoteCalculatorProps> = ({ quoteToEdit, s
                         </div>
                         <div className="flex justify-between">
                             <span className="text-textSecondary">Hora Homem:</span>
-                            <span className="font-medium text-textPrimary">R$ {(manHours * manHourRate).toFixed(2)}</span>
+                            <span className="font-medium text-textPrimary">R$ {(manCount * manHours * manHourRate).toFixed(2)} ({manCount}×{manHours}h)</span>
                         </div>
                         <div className="flex justify-between">
                             <span className="text-textSecondary">Hora Máquina:</span>
-                            <span className="font-medium text-textPrimary">R$ {(machineHours * machineHourRate).toFixed(2)}</span>
+                            <span className="font-medium text-textPrimary">R$ {(machineCount * machineHours * machineHourRate).toFixed(2)} ({machineCount}×{machineHours}h)</span>
                         </div>
                         <div className="flex justify-between">
                             <span className="text-textSecondary">Custo de Frete:</span>
@@ -555,7 +606,12 @@ export const QuoteCalculator: React.FC<QuoteCalculatorProps> = ({ quoteToEdit, s
                 </div>
             </div>
         </div>
-        <PdfActionModal isOpen={isPdfModalOpen} blob={pdfBlob} filename="orcamento.pdf" onClose={() => setIsPdfModalOpen(false)} />
+        <PdfActionModal 
+          isOpen={isPdfModalOpen} 
+          blob={pdfBlob} 
+          filename={`orcamento_${currentQuoteId || 'novo'}.pdf`} 
+          onClose={() => setIsPdfModalOpen(false)} 
+        />
     </div>
   )
 };

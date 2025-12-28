@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useData } from '../context/DataContext';
 import type { Quote } from '../types';
 import { PencilIcon, TrashIcon, EyeIcon } from './Icons';
 import { generateQuotePDF } from '../services/pdfGenerator';
+import PdfActionModal from './PdfActionModal';
 
 interface SavedQuotesProps {
   onEditQuote: (quote: Quote) => void;
@@ -10,6 +11,9 @@ interface SavedQuotesProps {
 
 export const SavedQuotes: React.FC<SavedQuotesProps> = ({ onEditQuote }) => {
   const { quotes, setQuotes, materials, settings } = useData();
+  const [pdfBlob, setPdfBlob] = useState<Blob | null>(null);
+  const [isPdfModalOpen, setIsPdfModalOpen] = useState(false);
+  const [currentPdfFilename, setCurrentPdfFilename] = useState('orcamento.pdf');
 
   const handleDelete = (id: string) => {
     if (window.confirm("Tem certeza que deseja remover este orçamento?")) {
@@ -22,7 +26,11 @@ export const SavedQuotes: React.FC<SavedQuotesProps> = ({ onEditQuote }) => {
         const material = materials.find(m => m.id === item.materialId);
         return acc + (material ? material.unitCost * item.quantity : 0);
     }, 0);
-    const indirectCosts = quote.laborCost + quote.freightCost;
+    const manCount = quote.manCount ?? 1;
+    const machineCount = quote.machineCount ?? 1;
+    const manCost = (quote.manHours || 0) * (quote.manHourRate || 0) * manCount;
+    const machineCost = (quote.machineHours || 0) * (quote.machineHourRate || 0) * machineCount;
+    const indirectCosts = quote.laborCost + manCost + machineCost + (quote.freightCost || 0);
     const totalProjectCost = materialCost + indirectCosts;
     const profitValue = totalProjectCost * (quote.profitMargin / 100);
     return totalProjectCost + profitValue;
@@ -35,7 +43,11 @@ export const SavedQuotes: React.FC<SavedQuotesProps> = ({ onEditQuote }) => {
         const material = materials.find(m => m.id === item.materialId);
         return acc + (material ? material.unitCost * item.quantity : 0);
     }, 0);
-    const indirectCosts = quote.laborCost + quote.freightCost;
+    const manCount = quote.manCount ?? 1;
+    const machineCount = quote.machineCount ?? 1;
+    const manCost = (quote.manHours || 0) * (quote.manHourRate || 0) * manCount;
+    const machineCost = (quote.machineHours || 0) * (quote.machineHourRate || 0) * machineCount;
+    const indirectCosts = quote.laborCost + manCost + machineCost + (quote.freightCost || 0);
     const totalProjectCost = materialCost + indirectCosts;
     const profitValue = totalProjectCost * (quote.profitMargin / 100);
     const totalWeight = quote.items.reduce((acc, item) => {
@@ -55,14 +67,19 @@ export const SavedQuotes: React.FC<SavedQuotesProps> = ({ onEditQuote }) => {
       finalValue: totalProjectCost + profitValue,
       totalWeight,
     };
-    const pdfResult = generateQuotePDF(quote, materials, settings, calculated);
-    if (pdfResult instanceof Blob) {
-      // open modal via custom event or state lift; simple approach: open in new tab directly but prefer download/open choice
-      const url = URL.createObjectURL(pdfResult);
-      window.open(url, '_blank');
-      setTimeout(() => URL.revokeObjectURL(url), 30000);
-    } else if (typeof pdfResult === 'string') {
-      window.open(pdfResult, '_blank');
+    
+    try {
+      const pdfResult = generateQuotePDF(quote, materials, settings, calculated);
+      if (pdfResult instanceof Blob) {
+        setPdfBlob(pdfResult);
+        setCurrentPdfFilename(`orcamento_${quote.id}.pdf`);
+        setIsPdfModalOpen(true);
+      } else if (typeof pdfResult === 'string') {
+        window.open(pdfResult, '_blank');
+      }
+    } catch (error) {
+      console.error('Erro ao gerar PDF:', error);
+      alert('Erro ao gerar PDF. Verifique o console para mais detalhes.');
     }
   }
 
@@ -109,6 +126,12 @@ export const SavedQuotes: React.FC<SavedQuotesProps> = ({ onEditQuote }) => {
           </table>
         </div>
       </div>
+      <PdfActionModal 
+        isOpen={isPdfModalOpen} 
+        blob={pdfBlob} 
+        filename={currentPdfFilename} 
+        onClose={() => setIsPdfModalOpen(false)} 
+      />
     </div>
   );
 };

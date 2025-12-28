@@ -48,8 +48,10 @@ export interface Quote {
   clientName: string;
   items: QuoteItem[];
   laborCost: number;
+  manCount?: number;
   manHours?: number;
   manHourRate?: number;
+  machineCount?: number;
   machineHours?: number;
   machineHourRate?: number;
   freightCost: number;
