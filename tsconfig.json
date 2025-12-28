@@ -18,7 +18,7 @@
     "baseUrl": ".",
     "paths": {
       "@/*": [
-        "sored-novo/src/*"
+        "sord-frontend/src/*"
       ]
     },
     "allowImportingTsExtensions": true,

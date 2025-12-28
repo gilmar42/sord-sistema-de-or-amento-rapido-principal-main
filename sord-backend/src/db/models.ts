@@ -11,10 +11,8 @@ const userSchema = new mongoose.Schema({
   email: {
     type: String,
     required: true,
-    unique: true,
     lowercase: true,
-    trim: true,
-    index: true
+    trim: true
   },
   password: {
     type: String,
@@ -284,7 +282,7 @@ const planSchema = new mongoose.Schema({
   name: {
     type: String,
     required: true,
-    enum: ['STARTER', 'PROFESSIONAL', 'ENTERPRISE']
+    enum: ['STANDARD']
   },
   displayName: {
     type: String,

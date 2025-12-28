@@ -4,6 +4,31 @@ Sistema completo de gestão de orçamentos com cálculos automáticos, gestão d
 
 ---
 
+## 📁 Estrutura do Projeto
+
+```
+sord-sistema/
+├── sord-frontend/          # Frontend (React + TypeScript + Vite)
+│   ├── src/
+│   │   ├── components/     # Componentes React
+│   │   ├── context/        # Context API (Auth, Data)
+│   │   ├── services/       # API e serviços
+│   │   └── config/         # Configurações
+│   └── package.json
+│
+├── sord-backend/           # Backend (Node.js + Express + MongoDB)
+│   ├── src/
+│   │   ├── controllers/    # Controladores
+│   │   ├── routes/         # Rotas da API
+│   │   ├── services/       # Serviços (Mercado Pago, etc)
+│   │   └── db/             # Conexão e modelos do banco
+│   └── package.json
+│
+└── package.json            # Scripts principais
+```
+
+---
+
 ## ✨ Funcionalidades Principais
 
 - 📊 **Calculadora de Orçamentos** - Cálculos automáticos de custos e margem de lucro

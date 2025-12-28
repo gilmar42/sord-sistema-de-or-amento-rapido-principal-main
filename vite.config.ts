@@ -8,7 +8,7 @@ export default defineConfig(({ mode }) => {
     const isProd = mode === 'production';
 
     return {
-      root: 'sored-novo',
+      root: 'sord-frontend',
       server: {
         port: 5173,
         host: '0.0.0.0',
@@ -42,7 +42,7 @@ export default defineConfig(({ mode }) => {
       },
       resolve: {
         alias: {
-            '@': path.resolve(process.cwd(), 'sored-novo/src'),
+            '@': path.resolve(process.cwd(), 'sord-frontend/src'),
         }
       }
     };
