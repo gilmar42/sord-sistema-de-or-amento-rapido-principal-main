@@ -6,7 +6,7 @@ const planCountMock = jest.fn();
 const planInsertManyMock = jest.fn();
 
 jest.mock('../../db/models.js', () => {
-  const Plan = jest.fn();
+  const Plan: any = jest.fn();
   Plan.find = planFindMock;
   Plan.findById = planFindByIdMock;
   Plan.findOne = planFindOneMock;
@@ -31,7 +31,7 @@ describe('PlanService', () => {
 
   beforeEach(async () => {
     jest.clearAllMocks();
-    const mod = await import('../../services/planService.js');
+    const mod = await import('../../services/planService');
     planService = mod.default;
   });
 

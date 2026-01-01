@@ -9,6 +9,65 @@ import paymentService from '../services/paymentService.js';
 import logger from '../utils/logger.js';
 
 /**
+ * POST /api/payments/public
+ * Criar pagamento público (sem autenticação) para novos usuários
+ */
+export const createPublicPayment = async (req: AuthRequest, res: Response) => {
+  try {
+    const { orderId, amount, email, description, token, paymentMethodId, installments, issuerId } = req.body;
+    const ipAddress = req.ip || req.socket.remoteAddress;
+
+    // Validações básicas
+    if (!orderId || !amount || !email || !description || !token || !paymentMethodId || !installments) {
+      return res.status(400).json({
+        success: false,
+        error: 'Campos obrigatórios: orderId, amount, email, description, token, paymentMethodId, installments',
+      });
+    }
+
+    logger.info('Iniciando processamento de pagamento público', {
+      orderId,
+      amount,
+      email,
+    });
+
+    const result = await paymentService.processPayment({
+      orderId,
+      amount,
+      email,
+      description,
+      token,
+      paymentMethodId,
+      installments,
+      issuerId,
+      tenantId: 'public',
+      ipAddress,
+    });
+
+    if (!result.success) {
+      return res.status(400).json({
+        success: false,
+        error: result.error,
+      });
+    }
+
+    res.status(201).json({
+      success: true,
+      data: result.data,
+    });
+  } catch (error: any) {
+    logger.error('Erro ao criar pagamento público', {
+      error: error.message,
+    });
+
+    res.status(500).json({
+      success: false,
+      error: 'Erro ao processar pagamento. Tente novamente.',
+    });
+  }
+};
+
+/**
  * POST /api/payments
  * Criar novo pagamento
  */

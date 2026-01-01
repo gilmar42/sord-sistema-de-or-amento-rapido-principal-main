@@ -8,7 +8,7 @@ jest.mock('uuid', () => ({
 }), { virtual: true });
 
 jest.mock('../../db/models.js', () => {
-  const Payment = jest.fn().mockImplementation((data: any) => ({
+  const Payment: any = jest.fn().mockImplementation((data: any) => ({
     ...data,
     save: paymentSaveMock,
   }));
@@ -46,7 +46,7 @@ describe('PaymentService', () => {
 
   beforeEach(async () => {
     jest.clearAllMocks();
-    const mod = await import('../../services/paymentService.js');
+    const mod = await import('../../services/paymentService');
     paymentService = mod.default;
   });
 

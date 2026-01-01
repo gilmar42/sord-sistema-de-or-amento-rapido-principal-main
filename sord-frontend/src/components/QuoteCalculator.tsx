@@ -165,7 +165,6 @@ export const QuoteCalculator: React.FC<QuoteCalculatorProps> = ({ quoteToEdit, s
         items,
         laborCost,
         manCount,
-        manCount,
         manHours,
             machineCount,
         machineHourRate,

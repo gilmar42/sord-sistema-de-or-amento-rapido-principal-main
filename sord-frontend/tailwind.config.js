@@ -38,10 +38,21 @@ export default {
           '0%': { opacity: '0', transform: 'translateX(-10px)' },
           '100%': { opacity: '1', transform: 'translateX(0)' },
         },
+        blob: {
+          '0%, 100%': { transform: 'translate(0, 0) scale(1)' },
+          '33%': { transform: 'translate(30px, -50px) scale(1.1)' },
+          '66%': { transform: 'translate(-20px, 20px) scale(0.9)' },
+        },
+        bounce: {
+          '0%, 100%': { transform: 'translateY(0)' },
+          '50%': { transform: 'translateY(-10px)' },
+        },
       },
       animation: {
         fadeUp: 'fadeUp 300ms ease-out',
         slideIn: 'slideIn 280ms ease-out',
+        blob: 'blob 7s infinite',
+        bounce: 'bounce 2s infinite',
       },
     },
   },
