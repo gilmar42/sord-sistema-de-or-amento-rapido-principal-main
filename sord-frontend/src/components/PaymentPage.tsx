@@ -84,7 +84,7 @@ export const PaymentPage: React.FC<PaymentPageProps> = ({ onPaymentSuccess, onPa
       const orderId = `order_${Date.now()}`;
       const paymentData = {
         orderId,
-        amount: 0.01, // Pagamento simbólico de teste
+        amount: 100.00, // Valor de produção
         email: email,
         description: 'Acesso ao SORD - Sistema de Orçamento Rápido',
         token: 'test_token', // Em produção: usar window.MercadoPago.createCardToken()
@@ -143,13 +143,23 @@ export const PaymentPage: React.FC<PaymentPageProps> = ({ onPaymentSuccess, onPa
       <div className="w-full max-w-md">
         {/* Cabeçalho */}
         <div className="text-center mb-8">
-          <div className="flex items-center justify-center gap-2 mb-4">
-            <SparklesIcon className="w-8 h-8 text-primary" />
-            <h1 className="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-primary to-cyan-500">
+          <div className="flex items-center justify-center gap-3 mb-4">
+            <SparklesIcon className="w-10 h-10 text-primary drop-shadow-lg" />
+            <h1 
+              className="text-4xl font-extrabold tracking-tight" 
+              style={{ 
+                color: '#06b6d4',
+                textShadow: '0 2px 10px rgba(6, 182, 212, 0.3), 0 0 20px rgba(6, 182, 212, 0.2)',
+                fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
+                WebkitFontSmoothing: 'antialiased',
+                MozOsxFontSmoothing: 'grayscale',
+                fontWeight: 800
+              }}
+            >
               SORED
             </h1>
           </div>
-          <p className="text-textSecondary">Ative sua conta para acessar o sistema</p>
+          <p className="text-textSecondary text-lg font-medium">Ative sua conta para acessar o sistema</p>
         </div>
 
         {/* Card de Pagamento */}
@@ -202,20 +212,13 @@ export const PaymentPage: React.FC<PaymentPageProps> = ({ onPaymentSuccess, onPa
               />
             </div>
 
-            {/* Informação de Teste */}
-            <div className="p-4 bg-blue-500/10 border border-blue-500/30 rounded-lg">
-              <p className="text-sm text-blue-600 dark:text-blue-400">
-                <strong>Modo Teste:</strong> Use qualquer nome e email para ativar sua conta.
-              </p>
-            </div>
-
             {/* Botão Submit */}
             <button
               type="submit"
               disabled={isProcessing}
-              className="w-full px-4 py-3 bg-gradient-to-r from-primary to-cyan-500 text-white font-bold rounded-lg hover:shadow-lg hover:scale-105 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full px-4 py-4 bg-gradient-to-r from-emerald-500 via-cyan-500 to-blue-500 text-white font-bold text-lg rounded-xl hover:shadow-2xl hover:scale-105 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed animate-pulse hover:animate-none border-2 border-emerald-400 shadow-lg shadow-emerald-500/50"
             >
-              {isProcessing ? 'Processando...' : 'Ativar Conta (R$ 0,01)'}
+              {isProcessing ? '⏳ Processando...' : '✓ Ativar Conta (R$ 100,00)'}
             </button>
           </form>
 
