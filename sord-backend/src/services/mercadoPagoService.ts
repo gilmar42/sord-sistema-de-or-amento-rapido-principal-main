@@ -2,20 +2,40 @@ import { MercadoPagoConfig, Payment, Preference } from 'mercadopago';
 import { Payment as PaymentModel } from '../db/models.js';
 import { v4 as uuidv4 } from 'uuid';
 
-// Validação crítica: token deve existir em produção
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// VALIDAÇÕES CRÍTICAS PARA PRODUÇÃO
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+// 1. Token deve existir
 if (!process.env.MERCADO_PAGO_ACCESS_TOKEN) {
   console.error('❌ ERRO CRÍTICO: MERCADO_PAGO_ACCESS_TOKEN não configurado');
   if (process.env.NODE_ENV === 'production') {
     throw new Error('MERCADO_PAGO_ACCESS_TOKEN é obrigatório em produção');
   }
+  console.warn('⚠️  Sistema rodando SEM credenciais do Mercado Pago');
 }
 
-// Avisar sobre token de teste em produção
-if (process.env.NODE_ENV === 'production' && 
-    process.env.MERCADO_PAGO_ACCESS_TOKEN?.startsWith('TEST-')) {
-  console.warn('⚠️  AVISO: Token de TESTE detectado em ambiente de PRODUÇÃO');
+// 2. Avisar sobre token de teste em produção
+if (process.env.NODE_ENV === 'production') {
+  if (process.env.MERCADO_PAGO_ACCESS_TOKEN?.startsWith('TEST-')) {
+    console.error('🚨 ERRO: Token de TESTE detectado em PRODUÇÃO!');
+    console.error('🚨 Pagamentos não funcionarão corretamente!');
+    console.error('🚨 Configure credenciais de produção (APP_USR-)');
+    throw new Error('Credenciais de TESTE não são permitidas em PRODUÇÃO');
+  }
+  
+  if (process.env.MERCADO_PAGO_PUBLIC_KEY?.startsWith('TEST-')) {
+    console.error('🚨 ERRO: Public Key de TESTE detectada em PRODUÇÃO!');
+    throw new Error('Public Key de TESTE não é permitida em PRODUÇÃO');
+  }
+  
+  console.log('✅ Mercado Pago configurado para PRODUÇÃO');
+  console.log(`✅ Access Token: ${process.env.MERCADO_PAGO_ACCESS_TOKEN.substring(0, 15)}...`);
+} else {
+  console.log('🧪 Mercado Pago configurado para DESENVOLVIMENTO/TESTE');
 }
 
+// 3. Configurar cliente
 const client = new MercadoPagoConfig({
   accessToken: process.env.MERCADO_PAGO_ACCESS_TOKEN || '',
 });
