@@ -6,6 +6,7 @@
 import { v4 as uuidv4 } from 'uuid';
 import { Payment } from '../db/models.js';
 import logger from '../utils/logger.js';
+import MercadoPagoService from './mercadoPagoService.js';
 
 interface PaymentRequest {
   orderId: string;
@@ -257,15 +258,36 @@ class PaymentService {
    * Simula chamada ao Mercado Pago (em produção, integrar SDK real)
    */
   private async createMercadoPagoPayment(req: ProcessPaymentRequest): Promise<any> {
-    // Em desenvolvimento/staging, retornar resposta simulada
-    // Em produção, integrar com SDK real do Mercado Pago
-    
+    // Em produção (sem sandbox), usar SDK real do Mercado Pago
     if (process.env.NODE_ENV === 'production' && !process.env.USE_MP_SANDBOX) {
-      // Usar SDK real do Mercado Pago
-      throw new Error('Integração com Mercado Pago não configurada para produção');
+      const result = await MercadoPagoService.processPayment({
+        orderId: req.orderId,
+        amount: req.amount,
+        token: req.token,
+        paymentMethodId: req.paymentMethodId,
+        installments: req.installments,
+        email: req.email,
+        description: req.description,
+        issuerId: req.issuerId,
+        metadata: { ipAddress: req.ipAddress },
+        tenantId: req.tenantId,
+      });
+
+      if (!result.success || !result.data) {
+        throw new Error(result.error || 'Falha ao processar pagamento no Mercado Pago');
+      }
+
+      return {
+        id: result.data.id,
+        status: result.data.status,
+        status_detail: result.data.status_detail,
+        transaction_amount: result.data.amount,
+        description: result.data.description,
+        created_at: new Date().toISOString(),
+      };
     }
 
-    // Simular respostas diferentes com base em dados de teste
+    // Em desenvolvimento/staging, retornar resposta simulada
     const isTest = req.email.includes('test');
     const status = isTest ? 'approved' : 'pending';
 

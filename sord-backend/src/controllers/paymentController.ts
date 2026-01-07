@@ -7,6 +7,7 @@ import { Response } from 'express';
 import { AuthRequest } from '../utils/auth';
 import paymentService from '../services/paymentService.js';
 import logger from '../utils/logger.js';
+import mercadoPagoService from '../services/mercadoPagoService.js';
 
 /**
  * POST /api/payments/public
@@ -64,6 +65,39 @@ export const createPublicPayment = async (req: AuthRequest, res: Response) => {
       success: false,
       error: 'Erro ao processar pagamento. Tente novamente.',
     });
+  }
+};
+
+/**
+ * POST /api/payments/public/checkout
+ * Criar preferência de checkout (Checkout Pro) e retornar URL de redirecionamento
+ */
+export const createPublicCheckoutPreference = async (req: AuthRequest, res: Response) => {
+  try {
+    const { orderId, amount, email, description } = req.body;
+
+    if (!orderId || !amount || !description) {
+      return res.status(400).json({
+        success: false,
+        error: 'Campos obrigatórios: orderId, amount, description',
+      });
+    }
+
+    const result = await mercadoPagoService.createCheckoutPreference({
+      orderId,
+      amount,
+      description,
+      email,
+    });
+
+    if (!result.success) {
+      return res.status(400).json({ success: false, error: result.error });
+    }
+
+    res.status(201).json({ success: true, data: result.data });
+  } catch (error: any) {
+    logger.error('Erro ao criar preferência de checkout', { error: error.message });
+    res.status(500).json({ success: false, error: 'Erro ao criar preferência' });
   }
 };
 

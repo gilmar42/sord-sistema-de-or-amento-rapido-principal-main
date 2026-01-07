@@ -2,6 +2,7 @@ import express from 'express';
 import {
   createPayment,
   createPublicPayment,
+  createPublicCheckoutPreference,
   getPaymentStatus,
   listPayments,
 } from '../controllers/paymentController.js';
@@ -11,6 +12,9 @@ const router = express.Router();
 
 // POST /api/payments/public - Criar pagamento SEM autenticação (para novos usuários)
 router.post('/public', createPublicPayment);
+
+// POST /api/payments/public/checkout - Criar preferência de Checkout Pro e retornar URL
+router.post('/public/checkout', createPublicCheckoutPreference);
 
 // Rotas protegidas - requerem autenticação
 router.use(authMiddleware);

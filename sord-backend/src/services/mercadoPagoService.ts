@@ -1,4 +1,4 @@
-import { MercadoPagoConfig, Payment } from 'mercadopago';
+import { MercadoPagoConfig, Payment, Preference } from 'mercadopago';
 import { Payment as PaymentModel } from '../db/models.js';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -110,6 +110,59 @@ export class MercadoPagoService {
         orderId: req.orderId,
       });
 
+      return {
+        success: false,
+        error: this.getErrorMessage(error),
+      };
+    }
+  }
+
+  async createCheckoutPreference(req: {
+    orderId: string;
+    amount: number;
+    description: string;
+    email?: string;
+  }): Promise<PaymentResponse> {
+    try {
+      if (!process.env.MERCADO_PAGO_ACCESS_TOKEN) {
+        throw new Error('MERCADO_PAGO_ACCESS_TOKEN não configurado');
+      }
+
+      const preference = new Preference(client);
+
+      const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+
+      const body = {
+        items: [
+          {
+            id: req.orderId,
+            title: req.description,
+            quantity: 1,
+            currency_id: 'BRL',
+            unit_price: req.amount,
+          },
+        ],
+        payer: req.email ? { email: req.email } : undefined,
+        back_urls: {
+          success: `${frontendUrl}/checkout/sucesso`,
+          failure: `${frontendUrl}/checkout/erro`,
+          pending: `${frontendUrl}/checkout/pendente`,
+        },
+        auto_return: 'approved',
+      } as any;
+
+      const result: any = await preference.create({ body });
+
+      return {
+        success: true,
+        data: {
+          id: result?.id,
+          initPoint: result?.init_point || result?.sandbox_init_point,
+          sandboxInitPoint: result?.sandbox_init_point,
+        },
+      };
+    } catch (error: any) {
+      console.error('[MercadoPago] Erro ao criar preferência:', error.message);
       return {
         success: false,
         error: this.getErrorMessage(error),

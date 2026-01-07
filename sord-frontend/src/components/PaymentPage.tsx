@@ -78,46 +78,39 @@ export const PaymentPage: React.FC<PaymentPageProps> = ({ onPaymentSuccess, onPa
         throw new Error('Por favor, preencha todos os campos');
       }
 
-      // Criar token do cartão com Mercado Pago (em produção)
-      // Para teste, vamos simular um pagamento bem-sucedido
-
+      // Checkout Pro: criar preferência e redirecionar para página do Mercado Pago
       const orderId = `order_${Date.now()}`;
-      const paymentData = {
+      const checkoutData = {
         orderId,
-        amount: 100.00, // Valor de produção
-        email: email,
+        amount: 100.0,
+        email,
         description: 'Acesso ao SORD - Sistema de Orçamento Rápido',
-        token: 'test_token', // Em produção: usar window.MercadoPago.createCardToken()
-        paymentMethodId: 'visa',
-        installments: 1,
       };
 
-      // Chamar endpoint público de pagamento (sem autenticação)
-      const response = await fetch(`${VITE_API_URL}/payments/public`, {
+      const response = await fetch(`${VITE_API_URL}/payments/public/checkout`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(paymentData),
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(checkoutData),
       });
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error || 'Erro ao processar pagamento');
+        throw new Error(errorData.error || 'Erro ao criar checkout');
       }
 
       const result = await response.json();
-      
       if (!result.success) {
-        throw new Error(result.error || 'Erro ao processar pagamento');
+        throw new Error(result.error || 'Erro ao criar checkout');
       }
 
-      setSuccessMessage('Pagamento processado com sucesso! Bem-vindo ao SORD.');
-      setTimeout(() => {
-        onPaymentSuccess();
-      }, 2000);
+      const redirectUrl = result.data?.initPoint || result.data?.sandboxInitPoint;
+      if (!redirectUrl) {
+        throw new Error('URL de redirecionamento não recebida');
+      }
+
+      window.location.href = redirectUrl;
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Erro desconhecido ao processar pagamento';
+      const errorMessage = err instanceof Error ? err.message : 'Erro desconhecido ao iniciar checkout';
       setError(errorMessage);
       onPaymentError(errorMessage);
     } finally {
