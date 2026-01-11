@@ -198,7 +198,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigateToAuth }) =>
                 key={index}
                 className="bg-surface/80 backdrop-blur-sm border border-border/50 p-6 rounded-xl shadow-lg hover:shadow-2xl hover:scale-105 transition-all duration-300 group hover:border-primary/50"
               >
-                <div className="mb-4 inline-block p-3 bg-gradient-to-br from-primary/30 to-cyan-500/30 rounded-xl group-hover:from-primary/50 group-hover:to-cyan-500/50 transition-colors">
+                <div className="mb-4 inline-block p-3 bg-linear-to-br from-primary/30 to-cyan-500/30 rounded-xl group-hover:from-primary/50 group-hover:to-cyan-500/50 transition-colors">
                   <div className="text-primary group-hover:text-cyan-400 transition-colors">
                     {feature.icon}
                   </div>
@@ -214,7 +214,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigateToAuth }) =>
       {/* Benefits Section */}
       <section className="py-20 px-4 sm:px-6 lg:px-10">
         <div className="max-w-4xl mx-auto">
-          <h2 className="text-4xl md:text-5xl font-black text-center mb-16 text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-cyan-400 drop-shadow-lg">
+          <h2 className="text-4xl md:text-5xl font-black text-center mb-16 text-transparent bg-clip-text bg-linear-to-r from-blue-600 to-cyan-400 drop-shadow-lg">
             Por que escolher SORED?
           </h2>
 
@@ -234,9 +234,9 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigateToAuth }) =>
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 px-4 sm:px-6 lg:px-10 bg-gradient-to-r from-primary/20 to-cyan-500/20 relative">
+      <section className="py-20 px-4 sm:px-6 lg:px-10 bg-linear-to-r from-primary/20 to-cyan-500/20 relative">
         <div className="max-w-3xl mx-auto text-center">
-          <h2 className="text-4xl md:text-5xl font-black mb-6 text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-cyan-400 drop-shadow-lg">
+          <h2 className="text-4xl md:text-5xl font-black mb-6 text-transparent bg-clip-text bg-linear-to-r from-blue-600 to-cyan-400 drop-shadow-lg">
             Pronto para começar?
           </h2>
           <p className="text-xl text-textPrimary mb-8 font-medium opacity-90">

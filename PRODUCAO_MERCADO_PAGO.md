@@ -1,4 +1,4 @@
-# 🚀 Guia de Implantação - Mercado Pago em Produção
+,,,,,,,,,,,,,,,,,,,,,,,,,# 🚀 Guia de Implantação - Mercado Pago em Produção
 
 Este guia detalha os passos necessários para ativar o Mercado Pago em ambiente de produção.
 

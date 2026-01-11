@@ -5,10 +5,10 @@
   "type": "module",
   "main": "src/server.js",
   "scripts": {
-    "dev": "node --loader ts-node/esm src/server.ts",
+    "dev": "npm run build && node dist/server.js",
     "build": "tsc",
     "start": "node dist/server.js",
-    "migrate-plans": "node --loader ts-node/esm src/utils/migratePlans.ts",
+    "migrate-plans": "node dist/utils/migratePlans.js",
     "test": "jest --detectOpenHandles",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
