@@ -8,22 +8,24 @@ export default defineConfig(({ mode }) => {
     const isProd = mode === 'production';
 
     return {
-      root: 'sord-frontend',
+      root: 'frontend',
       server: {
-        port: 5173,
+        port: 3000,
         host: '0.0.0.0',
-        strictPort: false,
+        // Forçar tipo MIME para arquivos .tsx e .ts
+        mimeTypes: {
+          '.tsx': 'application/javascript',
+          '.ts': 'application/javascript',
+        },
       },
       plugins: [
         react(),
         tailwindcss(),
       ],
-      clearScreen: false,
       build: {
         target: 'es2020',
         minify: 'terser',
         cssMinify: true,
-        outDir: '../dist',
         rollupOptions: {
           output: {
             manualChunks: {
@@ -42,7 +44,7 @@ export default defineConfig(({ mode }) => {
       },
       resolve: {
         alias: {
-            '@': path.resolve(process.cwd(), 'sord-frontend/src'),
+          '@': path.resolve(__dirname, 'frontend'),
         }
       }
     };

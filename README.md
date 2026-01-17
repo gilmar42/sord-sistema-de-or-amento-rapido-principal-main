@@ -1,228 +1,147 @@
-# 🚀 SORD - Sistema de Orçamento Rápido
+# 🚀 SORED - Sistema de Orçamento Rápido
 
-Sistema completo de gestão de orçamentos com cálculos automáticos, gestão de materiais, clientes e pagamentos via Mercado Pago.
+Sistema completo de gestão de orçamentos com cálculos automáticos, gestão de materiais, clientes e geração de PDF profissional.
 
----
+## ✨ Funcionalidades
 
-## 📁 Estrutura do Projeto
-
-```
-sord-sistema/
-├── sord-frontend/          # Frontend (React + TypeScript + Vite)
-│   ├── src/
-│   │   ├── components/     # Componentes React
-│   │   ├── context/        # Context API (Auth, Data)
-│   │   ├── services/       # API e serviços
-│   │   └── config/         # Configurações
-│   └── package.json
-│
-├── sord-backend/           # Backend (Node.js + Express + MongoDB)
-│   ├── src/
-│   │   ├── controllers/    # Controladores
-│   │   ├── routes/         # Rotas da API
-│   │   ├── services/       # Serviços (Mercado Pago, etc)
-│   │   └── db/             # Conexão e modelos do banco
-│   └── package.json
-│
-└── package.json            # Scripts principais
-```
-
----
-
-## ✨ Funcionalidades Principais
-
-- 📊 **Calculadora de Orçamentos** - Cálculos automáticos de custos e margem de lucro
-- 🔧 **Gestão de Materiais** - Cadastro de materiais e componentes
-- 👥 **Gestão de Clientes** - CRUD completo de clientes
-- 💳 **Pagamentos** - Integração com Mercado Pago (Checkout Transparente)
-- 📄 **Geração de PDF** - Orçamentos profissionais
-- 💾 **Persistência Local** - Dados salvos no navegador
-- 🎨 **Dark Mode** - Interface moderna
-- 📱 **Responsivo** - Funciona em todos os dispositivos
-
----
+- 📊 **Calculadora de Orçamentos** - Cálculos automáticos baseados em componentes
+- 🔧 **Gestão de Materiais** - Controle completo de materiais e componentes
+- 👥 **Gestão de Clientes** - CRUD completo com busca e estatísticas
+- 📄 **Geração de PDF** - Orçamentos profissionais em PDF
+- 💾 **Persistência Automática** - Dados salvos automaticamente no navegador
+- 🎨 **Tema Ice/Blue** - Interface moderna com cores profissionais
+- 🌓 **Dark Mode** - Suporte a modo escuro
+- 📱 **Responsivo** - Funciona em desktop, tablet e mobile
 
 ## 🛠️ Tecnologias
 
-### Frontend
-- React 18.2 + TypeScript
-- Vite 5.4
-- Tailwind CSS v4
+- **React 18.2.0** - Framework UI
+- **TypeScript** - Type safety
+- **Vite 5.4.21** - Build tool rápido
+- **Tailwind CSS v4** - Estilização moderna
+- **Jest + Testing Library** - Testes automatizados
+- **jsPDF** - Geração de PDF
 
-### Backend
-- Node.js + Express
-- **MongoDB** + Mongoose
-- Mercado Pago SDK
+## 🚀 Como Executar
 
----
+### Pré-requisitos
+- Node.js 16+
+- npm ou yarn
 
-## 🚀 Instalação e Uso
+### Instalação
 
-### 1. Frontend
+1. Clone o repositório:
+   ```bash
+   git clone https://github.com/gilmar42/sord-sistema-de-or-amento-rapido-principal.git
+   cd sored---sistema-de-orçamento-rápido
+   ```
+
+2. Instale as dependências:
+   ```bash
+   npm install
+   ```
+
+3. Execute o servidor de desenvolvimento:
+   ```bash
+   npm run dev
+   ```
+
+4. Acesse no navegador:
+   ```
+   http://localhost:5173
+   ```
+
+## 🧪 Testes
+
+O projeto possui uma suíte completa de testes automatizados (86+ casos de teste).
+
+### Executar todos os testes
+```bash
+npm test
+```
+
+### Executar apenas testes de produção
+```bash
+npm run test:production
+```
+
+### Validação completa para produção
+```bash
+npm run validate:production
+```
+
+📚 **Documentação Completa de Testes**: [TESTING.md](./TESTING.md)
+
+## 📦 Build para Produção
 
 ```bash
-# Instalar dependências
-npm install
-
-# Iniciar servidor de desenvolvimento
-npm run dev
-
-# Build para produção
 npm run build
 ```
 
-Acesse: http://localhost:3000
+O build otimizado será gerado na pasta `dist/`.
 
-### 2. Backend
+## 📖 Documentação
 
-```bash
-# Entrar na pasta do backend
-cd sord-backend
+- [TESTING.md](./TESTING.md) - Documentação completa dos testes
+- [PRODUCTION-GUIDE.md](./PRODUCTION-GUIDE.md) - Guia rápido para produção
+- [TESTS-SUMMARY.md](./TESTS-SUMMARY.md) - Resumo da implementação
 
-# Instalar dependências
-npm install
-
-# Configurar variáveis de ambiente
-cp .env.example .env
-# Edite o .env com suas credenciais
-
-# Executar migrations
-npm run migrate
-
-# Iniciar servidor
-npm run dev
-```
-
-Acesse: http://localhost:3001
-
----
-
-## 💳 Configurar Mercado Pago
-
-### Configuração Rápida
-
-1. Obtenha suas credenciais em: https://www.mercadopago.com.br/developers
-
-2. Configure no arquivo `.env.local` (frontend):
-```env
-VITE_API_URL=http://localhost:3001/api
-VITE_MERCADO_PAGO_PUBLIC_KEY=TEST-xxxxx
-```
-
-3. Configure no arquivo `sord-backend/.env`:
-```env
-MONGODB_URI=mongodb://localhost:27017/sord_db
-JWT_SECRET=sua-chave-secreta-minimo-32-caracteres-aqui
-MERCADO_PAGO_ACCESS_TOKEN=TEST-xxxxx
-FRONTEND_URL=http://localhost:3000
-PORT=3001
-```
-
-### Testar Pagamentos
-
-Use cartões de teste do Mercado Pago:
-
-**Aprovado:**
-```
-5031 4332 1540 6351 | 11/25 | 123
-```
-
-**Recusado:**
-```
-5031 7557 3453 0604 | 11/25 | 123
-```
-
----
-
-## 📡 API Backend
-
-A API completa está documentada em [`sord-backend/API_DOCUMENTATION.md`](sord-backend/API_DOCUMENTATION.md).
-
-### Endpoints Principais:
-
-**Autenticação:**
-- `POST /api/auth/register` - Registrar usuário
-- `POST /api/auth/login` - Login
-- `GET /api/auth/profile` - Perfil (requer token)
-
-**Clientes:**
-- `GET /api/clients` - Listar clientes
-- `POST /api/clients` - Criar cliente
-- `PUT /api/clients/:id` - Atualizar cliente
-- `DELETE /api/clients/:id` - Desativar cliente
-
-**Pagamentos:**
-- `POST /api/payments` - Processar pagamento
-- `GET /api/payments/:orderId` - Status do pagamento
-- `GET /api/payments` - Listar pagamentos
-
----
-
-## 📁 Estrutura do Projeto
+## 🎯 Estrutura do Projeto
 
 ```
-sord/
-├── src/                    # Frontend (React)
-│   ├── components/         # Componentes React
-│   ├── context/           # Context API
-│   ├── hooks/             # Custom hooks
-│   ├── services/          # Serviços (API, PDF)
-│   └── utils/             # Utilitários
-│
-├── sord-backend/          # Backend (Node.js)
-│   └── src/
-│       ├── controllers/   # Controllers
-│       ├── routes/        # Rotas
-│       ├── services/      # Serviços (Mercado Pago)
-│       └── db/            # Database
-│
-├── package.json           # Dependências frontend
-├── vite.config.ts         # Configuração Vite
-├── tailwind.config.js     # Configuração Tailwind
-└── tsconfig.json          # Configuração TypeScript
+src/
+├── components/          # Componentes React
+│   ├── QuoteCalculator.tsx
+│   ├── MaterialManagement.tsx
+│   ├── ClientManagement.tsx
+│   └── __tests__/      # Testes dos componentes
+├── context/            # Contextos React
+│   ├── DataContext.tsx
+│   ├── AuthContext.tsx
+│   └── __tests__/      # Testes dos contextos
+├── services/           # Serviços (PDF, etc)
+├── utils/             # Utilitários
+└── types.ts           # Definições TypeScript
 ```
 
----
+## 🔐 Autenticação
 
-## 🔧 Scripts Disponíveis
+O sistema usa autenticação simples com tenant isolation. Cada usuário tem seus dados isolados.
 
-### Frontend
-```bash
-npm run dev           # Desenvolvimento
-npm run build         # Build produção
-npm run preview       # Preview do build
-```
+## 💡 Como Usar
 
-### Backend
-```bash
-npm run dev           # Desenvolvimento
-npm run build         # Compilar TypeScript
-npm start             # Produção
-npm run migrate       # Executar migrations
-```
+1. **Criar Materiais**: Adicione materiais com componentes e custos
+2. **Cadastrar Clientes**: Registre seus clientes
+3. **Criar Orçamentos**: Selecione materiais, defina quantidades e margens
+4. **Gerar PDF**: Exporte orçamentos profissionais em PDF
 
----
+## 🤝 Contribuindo
 
-## 🌐 Deploy
+Contribuições são bem-vindas! Por favor:
 
-### Vercel (Frontend)
-```bash
-vercel --prod
-```
-
-### Heroku (Backend)
-```bash
-git push heroku main
-```
-
----
+1. Fork o projeto
+2. Crie uma branch para sua feature (`git checkout -b feature/AmazingFeature`)
+3. Commit suas mudanças (`git commit -m 'Add some AmazingFeature'`)
+4. Push para a branch (`git push origin feature/AmazingFeature`)
+5. Abra um Pull Request
 
 ## 📝 Licença
 
 Este projeto está sob a licença MIT.
 
----
-
 ## 👨‍💻 Autor
 
-Desenvolvido com ❤️ para facilitar a gestão de orçamentos.
+**Gilmar Dutra**
+- GitHub: [@gilmar42](https://github.com/gilmar42)
+
+## 🌟 Status do Projeto
+
+✅ **Pronto para Produção**
+- 86+ testes automatizados passando
+- Build otimizado
+- Documentação completa
+- Interface moderna e responsiva
+
+---
+
+**Última Atualização**: 20 de Novembro de 2025
