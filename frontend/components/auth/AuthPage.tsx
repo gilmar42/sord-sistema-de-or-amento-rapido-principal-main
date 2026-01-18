@@ -1,9 +1,13 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { SoredIcon } from '../Icons';
 
-export const AuthPage: React.FC = () => {
-  const [isLoginView, setIsLoginView] = useState(true);
+interface AuthPageProps {
+  paymentApproved?: boolean;
+}
+
+export const AuthPage: React.FC<AuthPageProps> = ({ paymentApproved = false }) => {
+  const [isLoginView, setIsLoginView] = useState(!paymentApproved);
   const { login, signup } = useAuth();
   
   const [email, setEmail] = useState('');
@@ -11,6 +15,12 @@ export const AuthPage: React.FC = () => {
   const [companyName, setCompanyName] = useState('');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    if (paymentApproved) {
+      setIsLoginView(false);
+    }
+  }, [paymentApproved]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -56,6 +66,13 @@ export const AuthPage: React.FC = () => {
             <SoredIcon className="w-12 h-12"/>
             <h1 className="ml-3 text-3xl font-bold text-textPrimary dark:text-slate-100">SORED</h1>
         </div>
+        {paymentApproved && (
+          <div className="bg-green-500/10 border border-green-500/50 rounded-lg p-4 mb-4 text-center">
+            <p className="text-green-600 dark:text-green-400 font-semibold">
+              ✅ Pagamento aprovado! Complete seu cadastro para receber seu ID por e-mail.
+            </p>
+          </div>
+        )}
         <div className="bg-surface dark:bg-slate-800 shadow-xl rounded-lg px-8 pt-6 pb-8 mb-4">
           <h2 className="text-center text-2xl font-semibold text-textPrimary dark:text-slate-100 mb-6">
             {isLoginView ? 'Acessar sua Conta' : 'Criar Nova Conta'}

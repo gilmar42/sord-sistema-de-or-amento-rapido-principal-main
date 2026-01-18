@@ -33,8 +33,8 @@ describe('LandingPage', () => {
     const mockGetStarted = jest.fn();
     render(<LandingPage onGetStarted={mockGetStarted} />);
     
-    const buttons = screen.getAllByText(/Começar Agora/i);
-    fireEvent.click(buttons[0]);
+    const button = screen.getByText(/Criar Primeiro Orçamento/i);
+    fireEvent.click(button);
     
     expect(mockGetStarted).toHaveBeenCalledTimes(1);
   });
@@ -43,10 +43,10 @@ describe('LandingPage', () => {
     const mockGetStarted = jest.fn();
     render(<LandingPage onGetStarted={mockGetStarted} />);
     
-    const button = screen.getByText(/Criar Primeiro Orçamento/i);
+    const button = screen.getByRole('button', { name: /Começar Agora/i });
     fireEvent.click(button);
     
-    expect(mockGetStarted).toHaveBeenCalledTimes(1);
+    expect(mockGetStarted).not.toHaveBeenCalled();
   });
 
   it('should display statistics', () => {

@@ -102,16 +102,16 @@ function validateStructure() {
   log.header('2. VALIDANDO ESTRUTURA DE ARQUIVOS');
   
   const requiredFiles = [
-    'src/App.tsx',
-    'src/index.tsx',
-    'src/types.ts',
-    'src/context/DataContext.tsx',
-    'src/context/AuthContext.tsx',
-    'src/components/QuoteCalculator.tsx',
-    'src/components/MaterialManagement.tsx',
-    'src/components/ClientManagement.tsx',
-    'src/components/MainLayout.tsx',
-    'src/services/pdfGenerator.ts',
+    'frontend/App.tsx',
+    'frontend/index.tsx',
+    'frontend/types.ts',
+    'frontend/context/DataContext.tsx',
+    'frontend/context/AuthContext.tsx',
+    'frontend/components/QuoteCalculator.tsx',
+    'frontend/components/MaterialManagement.tsx',
+    'frontend/components/ClientManagement.tsx',
+    'frontend/components/MainLayout.tsx',
+    'frontend/services/pdfGenerator.ts',
     'vite.config.ts',
     'tsconfig.json',
   ];

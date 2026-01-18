@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import { useData } from '../context/DataContext';
-import { Material, QuoteItem, Quote, CalculatedCosts } from '../types';
+import type { Material, QuoteItem, Quote, CalculatedCosts } from '../types';
 import { generateQuotePDF } from '../services/pdfGenerator';
 import { formatComponentSize } from '../utils/componentUtils';
 import * as Icons from '../components/Icons';

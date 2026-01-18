@@ -9,7 +9,7 @@ import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom';
 import { ClientManagement } from '../ClientManagement';
 import { DataProvider } from '../../context/DataContext';
-import { Client } from '../../types';
+import type { Client } from '../../types';
 
 // Mock do AuthContext
 jest.mock('../../context/AuthContext', () => ({

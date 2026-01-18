@@ -1,7 +1,8 @@
 
-import React, { createContext, useContext, ReactNode } from 'react';
+import React, { createContext, useContext } from 'react';
+import type { ReactNode } from 'react';
 import { useLocalStorage } from '../hooks/useLocalStorage';
-import { Material, Quote, AppSettings, Category } from '../types';
+import type { Material, Quote, AppSettings, Category } from '../types';
 import { useAuth } from './AuthContext';
 import { normalizeMaterials } from '../utils/normalizeMaterials';
 

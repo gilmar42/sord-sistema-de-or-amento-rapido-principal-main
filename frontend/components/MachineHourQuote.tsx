@@ -2,7 +2,7 @@ import React, { useMemo, useState } from 'react';
 import { CogIcon, PlusIcon, TrashIcon, SaveIcon } from './Icons';
 import { useData } from '../context/DataContext';
 import { useToast } from '../hooks/useToast';
-import { Quote } from '../types';
+import type { Quote } from '../types';
 
 interface MachineItem {
   id: string;

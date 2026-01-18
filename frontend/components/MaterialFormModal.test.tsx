@@ -3,7 +3,7 @@ import { render, screen, fireEvent, waitFor, act, within } from '@testing-librar
 import userEvent from '@testing-library/user-event';
 import { MaterialFormModal } from './MaterialFormModal';
 import { DataContext } from '../context/DataContext';
-import { Material, Category, ProductComponent } from '../types';
+import type { Material, Category, ProductComponent } from '../types';
 
 // Mock uuid module to avoid ES module syntax error
 jest.mock('uuid', () => ({

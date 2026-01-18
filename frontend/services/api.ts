@@ -166,6 +166,14 @@ class ApiService {
       body: JSON.stringify(settings),
     });
   }
+
+  async createPaymentPreference(planType: 'monthly' | 'annual', customerEmail?: string, idempotencyKey?: string) {
+    return this.request('/payments/preference', {
+      method: 'POST',
+      headers: idempotencyKey ? { 'Idempotency-Key': idempotencyKey } : undefined,
+      body: JSON.stringify({ planType, customerEmail }),
+    });
+  }
 }
 
 export const apiService = new ApiService();

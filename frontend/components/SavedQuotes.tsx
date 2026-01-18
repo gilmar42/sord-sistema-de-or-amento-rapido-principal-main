@@ -1,6 +1,6 @@
 import React from 'react';
 import { useData } from '../context/DataContext';
-import { Quote } from '../types';
+import type { Quote } from '../types';
 import { PencilIcon, TrashIcon, EyeIcon } from './Icons';
 import { generateQuotePDF } from '../services/pdfGenerator';
 

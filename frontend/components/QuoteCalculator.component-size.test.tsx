@@ -8,7 +8,7 @@ import '@testing-library/jest-dom';
 import { QuoteCalculator } from './QuoteCalculator';
 import { DataProvider, DataContext } from '@/context/DataContext';
 import { AuthProvider } from '@/context/AuthContext';
-import { Material, Category, AppSettings } from '@/types';
+import type { Material, Category, AppSettings } from '@/types';
 
 // Mocking hooks and context
 jest.mock('@/hooks/useCategories', () => ({

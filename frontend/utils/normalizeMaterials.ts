@@ -1,4 +1,4 @@
-import { Material } from '../types';
+import type { Material } from '../types';
 
 // Lightweight normalization utilities for components/materials.
 // Exposed so DataContext and migration UI can share the same logic.

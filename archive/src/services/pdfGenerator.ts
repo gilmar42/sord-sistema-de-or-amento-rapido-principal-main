@@ -1,4 +1,4 @@
-import { Quote, Material, AppSettings, CalculatedCosts } from '../types';
+import type { Quote, Material, AppSettings, CalculatedCosts } from '../types';
 
 // These are expected to be available in the global scope from the scripts in index.html
 declare const jspdf: any;

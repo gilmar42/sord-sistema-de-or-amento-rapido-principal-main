@@ -7,20 +7,30 @@ import { SavedQuotes } from './SavedQuotes';
 import { LandingPage } from './LandingPage';
 import { HourlyQuote } from './HourlyQuote';
 import { MachineHourQuote } from './MachineHourQuote';
-import { Quote } from '../types';
+import type { Quote } from '../types';
 import { SoredIcon, CalculatorIcon, BoxIcon, CogIcon, DocumentTextIcon, ArrowLeftOnRectangleIcon, SunIcon, MoonIcon, UserGroupIcon, HomeIcon, ClockIcon } from './Icons';
 import { useAuth } from './../context/AuthContext';
 import { NavItem } from './NavItem';
 import { useDarkMode } from '../hooks/useDarkMode';
 
 
-type View = 'home' | 'calculator' | 'hourly' | 'machine' | 'materials' | 'settings' | 'quotes' | 'clients';
+export type View = 'home' | 'calculator' | 'hourly' | 'machine' | 'materials' | 'settings' | 'quotes' | 'clients';
 
-export const MainLayout: React.FC = () => {
-  const [currentView, setCurrentView] = useState<View>('home');
+interface MainLayoutProps {
+  initialView?: View;
+}
+
+export const MainLayout: React.FC<MainLayoutProps> = ({ initialView }) => {
+  const [currentView, setCurrentView] = useState<View>(initialView ?? 'home');
   const [quoteToEdit, setQuoteToEdit] = useState<Quote | null>(null);
   const { logout } = useAuth();
   const { isDark, toggleDarkMode } = useDarkMode();
+
+  React.useEffect(() => {
+    if (initialView) {
+      setCurrentView(initialView);
+    }
+  }, [initialView]);
 
   // Diagnostic: log view changes during debugging
   React.useEffect(() => {
@@ -62,7 +72,7 @@ export const MainLayout: React.FC = () => {
 
 
   return (
-      <div className="flex flex-col md:flex-row min-h-screen bg-ice-50 dark:bg-slate-900 transition-all duration-300 ease-in-out">
+    <div className="flex flex-col md:flex-row min-h-screen bg-ice-50 dark:bg-slate-900 transition-all duration-300 ease-in-out">
         <aside className="w-full md:w-56 bg-linear-to-b from-sidebar-700 to-sidebar-900 dark:from-sidebar-800 dark:to-slate-900 shadow-lg hover:shadow-xl fixed bottom-0 md:relative md:min-h-screen z-20 flex flex-col transition-all duration-300 ease-in-out backdrop-blur-sm">
           <div className="px-4 py-6 grow">
             <div className="flex items-center justify-between md:justify-center text-white mb-8 group">

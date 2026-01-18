@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Material, Category, ProductComponent, WeightUnit } from '../types';
+import type { Material, Category, ProductComponent, WeightUnit } from '../types';
 import { useData } from '../context/DataContext';
 import { parseDimensionInput } from '../utils/parsers';
 import { v4 as uuidv4 } from 'uuid';

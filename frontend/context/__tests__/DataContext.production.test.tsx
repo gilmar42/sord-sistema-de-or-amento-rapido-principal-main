@@ -6,7 +6,7 @@
 import React from 'react';
 import { renderHook, act } from '@testing-library/react';
 import { DataProvider, useData } from '../DataContext';
-import { Material, Quote, Client, AppSettings, WeightUnit } from '../../types';
+import type { Material, Quote, Client, AppSettings, WeightUnit } from '../../types';
 
 // Mock do AuthContext
 jest.mock('../../context/AuthContext', () => ({

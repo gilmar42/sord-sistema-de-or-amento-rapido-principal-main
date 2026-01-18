@@ -15,12 +15,15 @@
     "isolatedModules": true,
     "allowJs": true,
     "jsx": "react-jsx",
-    "baseUrl": "./frontend",
     "paths": {
       "@/*": [
-        "./*"
+        "./frontend/*"
       ]
     },
+    "types": [
+      "vite/client"
+    ],
+    "verbatimModuleSyntax": true,
     "allowImportingTsExtensions": true,
     "noEmit": true
   }

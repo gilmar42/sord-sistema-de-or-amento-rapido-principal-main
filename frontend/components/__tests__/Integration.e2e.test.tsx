@@ -11,7 +11,7 @@ import { MaterialManagement } from '../MaterialManagement';
 import { QuoteCalculator } from '../QuoteCalculator';
 import { SavedQuotes } from '../SavedQuotes';
 import { generateQuotePDF } from '../../services/pdfGenerator';
-import { Material, WeightUnit } from '../../types';
+import type { Material, WeightUnit } from '../../types';
 
 // Mock da função de gerar PDF
 jest.mock('../../services/pdfGenerator');

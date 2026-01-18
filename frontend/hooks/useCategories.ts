@@ -1,5 +1,5 @@
 import { useCallback } from 'react';
-import { Category } from '../types';
+import type { Category } from '../types';
 import { useData } from '../context/DataContext';
 
 export const useCategories = () => {

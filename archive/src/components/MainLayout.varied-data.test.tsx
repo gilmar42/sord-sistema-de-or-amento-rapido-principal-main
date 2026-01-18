@@ -6,7 +6,7 @@ import '@testing-library/jest-dom';
 import { MainLayout } from './MainLayout';
 import { AuthProvider } from '../context/AuthContext';
 import { DataContext } from '../context/DataContext';
-import { Material, AppSettings, Category, Quote } from '../types';
+import type { Material, AppSettings, Category, Quote } from '../types';
 
 const defaultSettings: AppSettings = {
   companyName: 'Teste',

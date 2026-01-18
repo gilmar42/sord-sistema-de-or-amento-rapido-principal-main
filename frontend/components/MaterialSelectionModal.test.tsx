@@ -4,7 +4,7 @@ import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom';
 import { MaterialSelectionModal } from './MaterialSelectionModal';
 import { DataContext } from '../context/DataContext';
-import { Material, Category } from '../types';
+import type { Material, Category } from '../types';
 
 const mockMaterials: Material[] = [
   {

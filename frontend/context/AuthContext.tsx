@@ -1,9 +1,11 @@
 
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { User } from '../types';
+import React, { createContext, useContext, useState, useEffect } from 'react';
+import type { ReactNode } from 'react';
+import type { User } from '../types';
 
 interface AuthContextType {
   currentUser: User | null;
+  tenantId: string | null;
   login: (email: string, password: string) => Promise<boolean>;
   logout: () => void;
   signup: (companyName: string, email: string, password: string) => Promise<boolean>;
@@ -95,7 +97,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   };
 
   return (
-    <AuthContext.Provider value={{ currentUser, login, logout, signup, isLoading }}>
+    <AuthContext.Provider value={{ currentUser, tenantId: currentUser?.tenantId ?? null, login, logout, signup, isLoading }}>
       {children}
     </AuthContext.Provider>
   );

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useData } from '../context/DataContext';
-import { Client } from '../types';
+import type { Client } from '../types';
 import { PlusIcon, TrashIcon, PencilIcon, MagnifyingGlassIcon, UserGroupIcon, CheckIcon, XMarkIcon } from './Icons';
 import { useAuth } from '../context/AuthContext';
 

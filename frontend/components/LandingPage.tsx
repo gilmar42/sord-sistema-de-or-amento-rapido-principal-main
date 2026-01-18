@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { 
   CalculatorIcon, 
   BoxIcon, 
@@ -9,12 +9,37 @@ import {
   RocketLaunchIcon,
   CheckCircleIcon
 } from './Icons';
+import { apiService } from '../services/api';
 
 interface LandingPageProps {
   onGetStarted: () => void;
+  paymentStatus?: 'success' | 'pending' | 'failure' | null;
 }
 
-export const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
+export const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, paymentStatus }) => {
+  const [planType, setPlanType] = useState<'monthly' | 'annual'>('monthly');
+  const [isProcessingPayment, setIsProcessingPayment] = useState(false);
+
+  const startPayment = async () => {
+    setIsProcessingPayment(true);
+    try {
+      const idempotencyKey = typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : `sored-${Date.now()}`;
+      const response = await apiService.createPaymentPreference(planType, undefined, idempotencyKey);
+      const redirectUrl = response?.initPoint || response?.sandboxInitPoint;
+
+      if (!redirectUrl) {
+        throw new Error('URL de pagamento indisponível.');
+      }
+
+      window.location.href = redirectUrl;
+    } catch (error) {
+      console.error('Erro ao iniciar pagamento:', error);
+      window.alert('Não foi possível iniciar o pagamento no momento. Tente novamente ou contate o suporte.');
+    } finally {
+      setIsProcessingPayment(false);
+    }
+  };
+
   const features = [
     {
       icon: <CalculatorIcon className="w-12 h-12 text-blue-500" />,
@@ -70,14 +95,47 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
             <p className="text-xl sm:text-2xl text-blue-100 mb-8 max-w-3xl mx-auto animate-fade-in-up animation-delay-200">
               Sistema de Orçamento Rápido - A solução completa para gestão de orçamentos, materiais e clientes
             </p>
-            <button
-              onClick={onGetStarted}
-              className="group relative inline-flex items-center px-8 py-4 text-lg font-semibold text-white bg-linear-to-r from-yellow-400 to-yellow-500 rounded-full hover:from-yellow-500 hover:to-yellow-600 transform hover:scale-105 transition-all duration-300 shadow-2xl hover:shadow-yellow-500/50 animate-fade-in-up animation-delay-400"
-            >
-              <RocketLaunchIcon className="w-6 h-6 mr-2 group-hover:translate-x-1 transition-transform" />
-              Começar Agora
-              <span className="absolute inset-0 bg-white opacity-0 group-hover:opacity-20 rounded-full transition-opacity"></span>
-            </button>
+            {paymentStatus === 'success' ? (
+              <div className="flex flex-col items-center gap-4 animate-fade-in-up animation-delay-400">
+                <div className="bg-green-500/20 backdrop-blur border border-green-400/50 rounded-2xl px-8 py-4 mb-4">
+                  <p className="text-green-100 text-lg font-semibold flex items-center gap-2">
+                    <CheckCircleIcon className="w-6 h-6" />
+                    Pagamento aprovado! Complete seu cadastro abaixo.
+                  </p>
+                </div>
+              </div>
+            ) : (
+              <>
+                <div className="flex flex-col items-center gap-4 mb-6">
+                  <div className="inline-flex items-center bg-white/10 rounded-full p-1.5 backdrop-blur border border-white/20">
+                    <button
+                      onClick={() => setPlanType('monthly')}
+                      className={`px-8 py-3 rounded-full text-base font-bold transition-all ${planType === 'monthly' ? 'bg-white text-blue-700 shadow-lg' : 'text-white hover:bg-white/10'}`}
+                    >
+                      Plano Mensal · R$100
+                    </button>
+                    <button
+                      onClick={() => setPlanType('annual')}
+                      className={`px-8 py-3 rounded-full text-base font-bold transition-all ${planType === 'annual' ? 'bg-white text-blue-700 shadow-lg' : 'text-white hover:bg-white/10'}`}
+                    >
+                      Plano Anual · R$1100
+                    </button>
+                  </div>
+                  <p className="text-blue-100 text-base font-medium flex items-center gap-3">
+                    <span className="text-lg">💳</span> Cartão de Crédito  •  <span className="text-lg">🔲</span> Pix
+                  </p>
+                </div>
+                <button
+                  onClick={startPayment}
+                  disabled={isProcessingPayment}
+                  className="group relative inline-flex items-center px-8 py-4 text-lg font-semibold text-white bg-linear-to-r from-yellow-400 to-yellow-500 rounded-full hover:from-yellow-500 hover:to-yellow-600 transform hover:scale-105 transition-all duration-300 shadow-2xl hover:shadow-yellow-500/50 animate-fade-in-up animation-delay-400 disabled:opacity-70 disabled:cursor-not-allowed"
+                >
+                  <RocketLaunchIcon className="w-6 h-6 mr-2 group-hover:translate-x-1 transition-transform" />
+                  {isProcessingPayment ? 'Redirecionando...' : 'Começar Agora'}
+                  <span className="absolute inset-0 bg-white opacity-0 group-hover:opacity-20 rounded-full transition-opacity"></span>
+                </button>
+              </>
+            )}
           </div>
         </div>
         <div className="absolute bottom-0 left-0 right-0">

@@ -8,7 +8,7 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { QuoteCalculator } from '../QuoteCalculator';
 import { DataProvider } from '../../context/DataContext';
-import { Material, Quote, WeightUnit } from '../../types';
+import type { Material, Quote, WeightUnit } from '../../types';
 
 // Mock do AuthContext
 jest.mock('../../context/AuthContext', () => ({

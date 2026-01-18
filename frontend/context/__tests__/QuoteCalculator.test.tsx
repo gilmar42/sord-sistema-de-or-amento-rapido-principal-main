@@ -1,7 +1,7 @@
 import { render, screen, fireEvent, act, waitFor } from '@testing-library/react';
 import { QuoteCalculator } from '@/components/QuoteCalculator';
 import { useData } from '@/context/DataContext';
-import { Material, Quote } from '@/types';
+import type { Material, Quote } from '@/types';
 import { generateQuotePDF } from '@/services/pdfGenerator';
 
 const mockMaterials: Material[] = [

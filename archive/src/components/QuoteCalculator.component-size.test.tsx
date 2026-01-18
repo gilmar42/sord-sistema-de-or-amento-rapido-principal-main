@@ -2,7 +2,7 @@ import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import { QuoteCalculator } from './QuoteCalculator';
 import { DataContext } from '../context/DataContext';
-import { Material, Quote, AppSettings } from '../types';
+import type { Material, Quote, AppSettings } from '../types';
 
 /**
  * Test: QuoteCalculator component size rendering

@@ -3,7 +3,7 @@ import { ClockIcon, PlusIcon, TrashIcon, DocumentTextIcon, SaveIcon } from './Ic
 import { useData } from '../context/DataContext';
 import { useToast } from '../hooks/useToast';
 import { generatePDF } from '../services/pdfGenerator';
-import { Quote } from '../types';
+import type { Quote } from '../types';
 
 interface HourlyItem {
   id: string;

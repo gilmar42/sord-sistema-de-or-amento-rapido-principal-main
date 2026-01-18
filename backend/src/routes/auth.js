@@ -3,6 +3,7 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const db = require('../config/database');
 const { JWT_SECRET } = require('../middleware/auth');
+const { sendWelcomeEmail } = require('../services/emailService');
 
 const router = express.Router();
 
@@ -54,6 +55,14 @@ router.post('/signup', async (req, res) => {
       0,
       tenantId
     );
+
+    // Send welcome email with tenant ID and user ID
+    sendWelcomeEmail({
+      to: email,
+      companyName,
+      tenantId,
+      userId,
+    }).catch((err) => console.error('Failed to send welcome email:', err));
 
     // Generate token
     const token = jwt.sign({ userId, email, tenantId }, JWT_SECRET, { expiresIn: '7d' });

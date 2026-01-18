@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useData } from '../context/DataContext';
-import { AppSettings } from '../types';
+import type { AppSettings } from '../types';
 import { CheckCircleIcon } from './Icons';
 import normalizeMaterials from '../utils/normalizeMaterials';
 

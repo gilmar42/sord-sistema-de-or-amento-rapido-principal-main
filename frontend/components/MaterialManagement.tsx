@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from 'react';
-import { Material } from '../types';
+import type { Material } from '../types';
 import { useData } from '../context/DataContext';
 import { MaterialFormModal } from './MaterialFormModal';
 import { formatComponentDimensions } from '../utils/componentUtils';

@@ -4,7 +4,7 @@ import { MaterialManagement } from './MaterialManagement';
 
 import { Settings } from './Settings';
 import { SavedQuotes } from './SavedQuotes';
-import { Quote } from '../types';
+import type { Quote } from '../types';
 import { SoredIcon, CalculatorIcon, BoxIcon, CogIcon, DocumentTextIcon, ArrowLeftOnRectangleIcon } from './Icons';
 import { useAuth } from './../context/AuthContext';
 import { NavItem } from './NavItem';

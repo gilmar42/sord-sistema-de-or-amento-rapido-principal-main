@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useData } from '../context/DataContext';
-import { Material } from '../types';
+import type { Material } from '../types';
 
 interface MaterialSelectionModalProps {
   isOpen: boolean;

@@ -92,6 +92,21 @@ db.exec(`
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (tenant_id) REFERENCES tenants(id) ON DELETE CASCADE
   );
+
+  CREATE TABLE IF NOT EXISTS payments (
+    id TEXT PRIMARY KEY,
+    plan_type TEXT NOT NULL,
+    status TEXT NOT NULL,
+    amount REAL NOT NULL,
+    currency TEXT NOT NULL,
+    mp_preference_id TEXT UNIQUE,
+    mp_payment_id TEXT UNIQUE,
+    payer_email TEXT,
+    idempotency_key TEXT UNIQUE,
+    raw_payload TEXT,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  );
 `);
 
 console.log('✅ Database initialized successfully');
