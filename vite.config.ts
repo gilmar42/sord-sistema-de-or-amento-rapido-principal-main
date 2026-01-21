@@ -17,6 +17,13 @@ export default defineConfig(({ mode }) => {
           '.tsx': 'application/javascript',
           '.ts': 'application/javascript',
         },
+        proxy: {
+          '/api': {
+            target: 'http://localhost:5000',
+            changeOrigin: true,
+            rewrite: (path) => path,
+          },
+        },
       },
       plugins: [
         react(),

@@ -7,6 +7,8 @@ const db = require('../config/database');
 const router = express.Router();
 
 // Expect env names using pattern MERCADO_PAGO_* to match our .env files
+console.log('DEBUG MP_ACCESS_TOKEN:', process.env.MERCADO_PAGO_ACCESS_TOKEN);
+console.log('DEBUG MP_ACCESS_TOKEN:', process.env.MERCADO_PAGO_ACCESS_TOKEN);
 const MP_ACCESS_TOKEN = process.env.MERCADO_PAGO_ACCESS_TOKEN || process.env.MERCADOPAGO_ACCESS_TOKEN;
 const MP_PUBLIC_KEY = process.env.MERCADO_PAGO_PUBLIC_KEY || process.env.MERCADOPAGO_PUBLIC_KEY;
 const MP_WEBHOOK_SECRET = process.env.MERCADO_PAGO_WEBHOOK_SECRET || process.env.MP_WEBHOOK_SECRET;
