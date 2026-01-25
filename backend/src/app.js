@@ -14,9 +14,8 @@ const paymentsRoutes = require('./routes/payments');
 require('./config/database');
 
 const app = express();
-const PORT = process.env.PORT || 5000;
 
-// Middleware
+// Middleware CORS permissivo para desenvolvimento
 app.use(
   cors({
     origin: [
@@ -30,6 +29,10 @@ app.use(
     credentials: true,
   })
 );
+const PORT = process.env.PORT || 5000;
+
+// Middleware
+
 app.use('/api/payments/webhook', express.raw({ type: '*/*' }));
 app.use(express.json({ limit: '10mb' }));
 

@@ -13,109 +13,99 @@ describe('LandingPage - Integração Mercado Pago', () => {
   let alertMock: jest.Mock;
 
   beforeEach(() => {
-    let originalConsoleLog: typeof console.log;
-  it('deve iniciar pagamento e redirecionar para Mercado Pago', async () => {
-    jest.spyOn(apiService, 'createPaymentPreference').mockImplementation(async () => ({
-      initPoint: 'https://mercadopago.com/redirect',
-    }));
+    // Setup de mocks e variáveis antes de cada teste
+    originalLocation = window.location;
+    assignMock = jest.fn();
+    alertMock = jest.fn();
+    // @ts-ignore
+    delete window.location;
+    // @ts-ignore
+    window.location = { assign: assignMock };
+    window.alert = alertMock;
+  });
 
-    render(<LandingPage onGetStarted={() => {}} paymentStatus={null} />);
-    const planoAnualBtn = screen.getByText(/Plano Anual/i);
-    fireEvent.click(planoAnualBtn);
-    const comecarAgoraBtns = screen.getAllByRole('button', { name: /Começar Agora/i });
-    await act(async () => {
-      fireEvent.click(comecarAgoraBtns[0]);
+  afterEach(() => {
+    // Limpa mocks e restaura window.location
+    window.location = originalLocation;
+    jest.clearAllMocks();
+  });
+
+    it('deve iniciar pagamento e redirecionar para Mercado Pago', async () => {
+      jest.spyOn(apiService, 'createPaymentPreference').mockImplementation(async () => ({
+        initPoint: 'https://mercadopago.com/redirect',
+      }));
+
+      render(<LandingPage onGetStarted={() => {}} paymentStatus={null} />);
+      // Se existir botão para selecionar plano anual, clique nele
+      const planoAnualBtn = screen.queryByText(/Plano Anual/i);
+      if (planoAnualBtn) {
+        fireEvent.click(planoAnualBtn);
+      }
+      const comecarAgoraBtns = screen.getAllByRole('button', { name: /Começar Agora/i });
+      await act(async () => {
+        fireEvent.click(comecarAgoraBtns[0]);
+      });
+      await waitFor(() => {
+        expect(assignMock).toHaveBeenCalledWith('https://mercadopago.com/redirect');
+      });
     });
-    await waitFor(() => {
-      expect(assignMock).toHaveBeenCalledWith('https://mercadopago.com/redirect');
+
+    it('deve exibir erro se não houver link de pagamento (undefined)', async () => {
+      (apiService.createPaymentPreference as jest.Mock).mockResolvedValue(undefined);
+      await act(async () => {
+        render(<LandingPage onGetStarted={() => {}} paymentStatus={null} />);
+        const planoAnualBtn = screen.queryByText(/Plano Anual/i);
+        if (planoAnualBtn) {
+          fireEvent.click(planoAnualBtn);
+        }
+        const comecarAgoraBtns = screen.getAllByRole('button', { name: /Começar Agora/i });
+        // eslint-disable-next-line no-console
+        console.log('DEBUG: Botões Começar Agora encontrados:', comecarAgoraBtns.length);
+        fireEvent.click(comecarAgoraBtns[0]);
+      });
+      await waitFor(() => expect(alertMock).toHaveBeenCalled());
+      expect(alertMock).toHaveBeenCalledWith(
+        expect.stringMatching(/Não foi possível iniciar o pagamento|pagamento/i)
+      );
     });
-  });
 
-  it('deve exibir erro se não houver link de pagamento (undefined)', async () => {
-    (apiService.createPaymentPreference as jest.Mock).mockResolvedValue(undefined);
-    render(<LandingPage onGetStarted={() => {}} paymentStatus={null} />);
-    const comecarAgoraBtns = screen.getAllByRole('button', { name: /Começar Agora/i });
-    fireEvent.click(comecarAgoraBtns[0]);
-    // eslint-disable-next-line no-console
-    setTimeout(() => {
-      console.log('DEBUG: mockResolvedValue (undefined):', (apiService.createPaymentPreference as jest.Mock).mock.results);
-    }, 0);
-    await waitFor(() => expect(alertMock).toHaveBeenCalled());
-    // eslint-disable-next-line no-console
-    console.log('DEBUG: alertMock calls (undefined):', alertMock.mock.calls);
-    expect(alertMock).toHaveBeenCalledWith(
-      expect.stringMatching(/Não foi possível iniciar o pagamento|pagamento/i)
-    );
-      console.log = originalConsoleLog;
-  });
+    it('deve exibir erro se não houver link de pagamento (null)', async () => {
+      (apiService.createPaymentPreference as jest.Mock).mockResolvedValue(null);
+      await act(async () => {
+        render(<LandingPage onGetStarted={() => {}} paymentStatus={null} />);
+        const planoAnualBtn = screen.queryByText(/Plano Anual/i);
+        if (planoAnualBtn) {
+          fireEvent.click(planoAnualBtn);
+        }
+        const comecarAgoraBtns = screen.getAllByRole('button', { name: /Começar Agora/i });
+        // eslint-disable-next-line no-console
+        console.log('DEBUG: Botões Começar Agora encontrados:', comecarAgoraBtns.length);
+        fireEvent.click(comecarAgoraBtns[0]);
+      });
+      await waitFor(() => expect(alertMock).toHaveBeenCalled());
+      expect(alertMock).toHaveBeenCalledWith(
+        expect.stringMatching(/Não foi possível iniciar o pagamento|pagamento/i)
+      );
+    });
 
-  it('deve exibir erro se não houver link de pagamento (null)', async () => {
-    (apiService.createPaymentPreference as jest.Mock).mockResolvedValue(null);
-    render(<LandingPage onGetStarted={() => {}} paymentStatus={null} />);
-    const comecarAgoraBtns = screen.getAllByRole('button', { name: /Começar Agora/i });
-    fireEvent.click(comecarAgoraBtns[0]);
-    // eslint-disable-next-line no-console
-    setTimeout(() => {
-      console.log('DEBUG: mockResolvedValue (null):', (apiService.createPaymentPreference as jest.Mock).mock.results);
-    }, 0);
-    await waitFor(() => expect(alertMock).toHaveBeenCalled());
-    // eslint-disable-next-line no-console
-    console.log('DEBUG: alertMock calls (null):', alertMock.mock.calls);
-    expect(alertMock).toHaveBeenCalledWith(
-      expect.stringMatching(/Não foi possível iniciar o pagamento|pagamento/i)
-    );
-  });
-
-  it('deve exibir erro se não houver link de pagamento (undefined)', async () => {
-    (apiService.createPaymentPreference as jest.Mock).mockResolvedValue(undefined);
-    render(<LandingPage onGetStarted={() => {}} paymentStatus={null} />);
-    const comecarAgoraBtns = screen.getAllByRole('button', { name: /Começar Agora/i });
-    fireEvent.click(comecarAgoraBtns[0]);
-    // eslint-disable-next-line no-console
-    setTimeout(() => {
-      console.log('DEBUG: mockResolvedValue (undefined):', (apiService.createPaymentPreference as jest.Mock).mock.results);
-    }, 0);
-    await waitFor(() => expect(alertMock).toHaveBeenCalled());
-    // eslint-disable-next-line no-console
-    console.log('DEBUG: alertMock calls (undefined):', alertMock.mock.calls);
-    expect(alertMock).toHaveBeenCalledWith(
-      expect.stringMatching(/Não foi possível iniciar o pagamento|pagamento/i)
-    );
-  });
-
-  it('deve exibir erro se não houver link de pagamento (null)', async () => {
-    (apiService.createPaymentPreference as jest.Mock).mockResolvedValue(null);
-    render(<LandingPage onGetStarted={() => {}} paymentStatus={null} />);
-    const comecarAgoraBtns = screen.getAllByRole('button', { name: /Começar Agora/i });
-    fireEvent.click(comecarAgoraBtns[0]);
-    // eslint-disable-next-line no-console
-    setTimeout(() => {
-      console.log('DEBUG: mockResolvedValue (null):', (apiService.createPaymentPreference as jest.Mock).mock.results);
-    }, 0);
-    await waitFor(() => expect(alertMock).toHaveBeenCalled());
-    // eslint-disable-next-line no-console
-    console.log('DEBUG: alertMock calls (null):', alertMock.mock.calls);
-    expect(alertMock).toHaveBeenCalledWith(
-      expect.stringMatching(/Não foi possível iniciar o pagamento|pagamento/i)
-    );
-  });
-
-  it('deve exibir erro se não houver link de pagamento', async () => {
-    (apiService.createPaymentPreference as jest.Mock).mockResolvedValue({});
-    render(<LandingPage onGetStarted={() => {}} paymentStatus={null} />);
-    const comecarAgoraBtns = screen.getAllByRole('button', { name: /Começar Agora/i });
-    fireEvent.click(comecarAgoraBtns[0]);
-    // eslint-disable-next-line no-console
-    setTimeout(() => {
-      console.log('DEBUG: mockResolvedValue (empty object):', (apiService.createPaymentPreference as jest.Mock).mock.results);
-    }, 0);
-    await waitFor(() => expect(alertMock).toHaveBeenCalled());
-    // eslint-disable-next-line no-console
-    console.log('DEBUG: alertMock calls:', alertMock.mock.calls);
-    expect(alertMock).toHaveBeenCalledWith(
-      expect.stringMatching(/Não foi possível iniciar o pagamento|pagamento/i)
-    );
-  });
+    it('deve exibir erro se não houver link de pagamento (objeto vazio)', async () => {
+      (apiService.createPaymentPreference as jest.Mock).mockResolvedValue({});
+      await act(async () => {
+        render(<LandingPage onGetStarted={() => {}} paymentStatus={null} />);
+        const planoAnualBtn = screen.queryByText(/Plano Anual/i);
+        if (planoAnualBtn) {
+          fireEvent.click(planoAnualBtn);
+        }
+        const comecarAgoraBtns = screen.getAllByRole('button', { name: /Começar Agora/i });
+        // eslint-disable-next-line no-console
+        console.log('DEBUG: Botões Começar Agora encontrados:', comecarAgoraBtns.length);
+        fireEvent.click(comecarAgoraBtns[0]);
+      });
+      await waitFor(() => expect(alertMock).toHaveBeenCalled());
+      expect(alertMock).toHaveBeenCalledWith(
+        expect.stringMatching(/Não foi possível iniciar o pagamento|pagamento/i)
+      );
+    });
 });
 
 

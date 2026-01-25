@@ -17,6 +17,8 @@ interface LandingPageProps {
 }
 
 export const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, paymentStatus }) => {
+  // eslint-disable-next-line no-console
+  console.log('[DEBUG] LandingPage montado');
   const [planType, setPlanType] = useState<'monthly' | 'annual'>('monthly');
   const [isProcessingPayment, setIsProcessingPayment] = useState(false);
 
@@ -33,12 +35,16 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, paymentS
       console.error('Erro ao chamar createPaymentPreference:', error);
       setIsProcessingPayment(false);
       // eslint-disable-next-line no-console
+      console.log('[DEBUG] Exceção no startPayment:', error);
+      // eslint-disable-next-line no-console
       console.log('DEBUG: calling alert in error branch (catch)');
       window.alert('Não foi possível iniciar o pagamento no momento. Tente novamente ou contate o suporte.');
       return;
     }
     if (response == null) {
       setIsProcessingPayment(false);
+      // eslint-disable-next-line no-console
+      console.log('[DEBUG] Erro: response == null');
       // eslint-disable-next-line no-console
       console.log('DEBUG: calling alert in error branch (response == null)');
       window.alert('Não foi possível iniciar o pagamento no momento. Tente novamente ou contate o suporte.');
@@ -48,6 +54,8 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, paymentS
     const isValidUrl = typeof redirectUrl === 'string' && !!redirectUrl.trim();
     if (!isValidUrl) {
       setIsProcessingPayment(false);
+      // eslint-disable-next-line no-console
+      console.log('[DEBUG] Erro: redirectUrl inválido', redirectUrl);
       // eslint-disable-next-line no-console
       console.log('DEBUG: calling alert in error branch (invalid url)');
       window.alert('Não foi possível iniciar o pagamento no momento. Tente novamente ou contate o suporte.');
