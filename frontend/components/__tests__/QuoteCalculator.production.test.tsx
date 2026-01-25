@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { QuoteCalculator } from '../QuoteCalculator';
 import { DataProvider } from '../../context/DataContext';
@@ -148,7 +148,9 @@ describe('QuoteCalculator - Testes de Produção', () => {
 
       // Adicionar um material
       const addButton = screen.getByRole('button', { name: /Adicionar Item/i });
-      fireEvent.click(addButton);
+      await act(async () => {
+        fireEvent.click(addButton);
+      });
 
       // Selecionar material no modal
       await waitFor(() => {
@@ -156,7 +158,9 @@ describe('QuoteCalculator - Testes de Produção', () => {
       });
 
       const selectButton = screen.getByText(/Selecionar Material/i);
-      fireEvent.click(selectButton);
+      await act(async () => {
+        fireEvent.click(selectButton);
+      });
 
       // Verificar se o cálculo foi feito
       await waitFor(() => {

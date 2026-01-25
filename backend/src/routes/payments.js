@@ -1,6 +1,6 @@
 const express = require('express');
 const crypto = require('crypto');
-const mercadopago = require('mercadopago');
+const { MercadoPagoConfig, Preference, Payment } = require('mercadopago');
 const { v4: uuidv4 } = require('uuid');
 const db = require('../config/database');
 
@@ -9,6 +9,7 @@ const router = express.Router();
 // Expect env names using pattern MERCADO_PAGO_* to match our .env files
 console.log('DEBUG MP_ACCESS_TOKEN:', process.env.MERCADO_PAGO_ACCESS_TOKEN);
 console.log('DEBUG MP_ACCESS_TOKEN:', process.env.MERCADO_PAGO_ACCESS_TOKEN);
+
 const MP_ACCESS_TOKEN = process.env.MERCADO_PAGO_ACCESS_TOKEN || process.env.MERCADOPAGO_ACCESS_TOKEN;
 const MP_PUBLIC_KEY = process.env.MERCADO_PAGO_PUBLIC_KEY || process.env.MERCADOPAGO_PUBLIC_KEY;
 const MP_WEBHOOK_SECRET = process.env.MERCADO_PAGO_WEBHOOK_SECRET || process.env.MP_WEBHOOK_SECRET;
@@ -20,11 +21,10 @@ const PLAN_PRICING = {
   annual: 1100,
 };
 
-if (MP_ACCESS_TOKEN) {
-  mercadopago.configure({
-    access_token: MP_ACCESS_TOKEN,
-  });
-}
+// Instância MercadoPago para nova API
+const client = MP_ACCESS_TOKEN ? new MercadoPagoConfig({ accessToken: MP_ACCESS_TOKEN }) : null;
+const preferenceApi = client ? new Preference(client) : null;
+const paymentApi = client ? new Payment(client) : null;
 
 const getPaymentByIdempotencyKey = (key) => {
   if (!key) return null;
@@ -81,6 +81,11 @@ const upsertPaymentStatus = ({
 
 router.post('/preference', async (req, res) => {
   try {
+    console.log('DEBUG MP_ACCESS_TOKEN (runtime):', MP_ACCESS_TOKEN);
+    if (!preferenceApi) {
+      console.error('preferenceApi está null! Verifique se o access token Mercado Pago está correto e disponível nas variáveis de ambiente.');
+      return res.status(500).json({ error: 'preferenceApi não inicializado. Verifique o access token Mercado Pago.' });
+    }
     if (!MP_ACCESS_TOKEN) {
       return res.status(500).json({ error: 'Mercado Pago access token is not configured on the server.' });
     }
@@ -95,7 +100,8 @@ router.post('/preference', async (req, res) => {
     const existing = getPaymentByIdempotencyKey(idempotencyKey);
     if (existing && existing.mp_preference_id) {
       const parsed = parseInitPoints(existing);
-      return res.json({
+      // Sempre retorna JSON, nunca status 204
+      return res.status(200).json({
         preferenceId: existing.mp_preference_id,
         initPoint: parsed.initPoint,
         sandboxInitPoint: parsed.sandboxInitPoint,
@@ -129,7 +135,8 @@ router.post('/preference', async (req, res) => {
       payer: customerEmail ? { email: customerEmail } : undefined,
     };
 
-    const response = await mercadopago.preferences.create(preference);
+    console.log('Preference payload:', JSON.stringify(preference, null, 2));
+    const response = await preferenceApi.create(preference);
     const { id: preferenceId, init_point: initPoint, sandbox_init_point: sandboxInitPoint } = response.body || {};
 
     if (!preferenceId) {
@@ -155,8 +162,11 @@ router.post('/preference', async (req, res) => {
 
     res.json({ preferenceId, initPoint, sandboxInitPoint, publicKey: MP_PUBLIC_KEY || null });
   } catch (error) {
-    console.error('Error creating Mercado Pago preference:', error);
-    res.status(500).json({ error: 'Erro ao criar preferência de pagamento.' });
+    console.error('Error creating Mercado Pago preference:', error.message, error.cause || error.response?.data);
+    if (error.response) {
+      console.error('Mercado Pago error response:', error.response.data);
+    }
+    res.status(500).json({ error: 'Erro ao criar preferência de pagamento.', details: error.message, mp_error: error.response?.data });
   }
 });
 
@@ -226,7 +236,7 @@ router.post('/webhook', express.raw({ type: '*/*' }), async (req, res) => {
       return res.status(200).json({ received: true, ignored: true });
     }
 
-    const paymentInfo = await mercadopago.payment.findById(paymentId);
+    const paymentInfo = await paymentApi.findById(paymentId);
     const payment = paymentInfo.body || {};
     const preferenceId = payment?.order?.id || payment?.metadata?.preference_id;
     const planType = payment?.metadata?.planType || 'monthly';

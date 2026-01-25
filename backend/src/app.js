@@ -1,4 +1,5 @@
-require('dotenv').config();
+require('dotenv').config({ path: require('path').resolve(__dirname, '..', '.env') });
+console.log('DEBUG .env MERCADO_PAGO_ACCESS_TOKEN:', process.env.MERCADO_PAGO_ACCESS_TOKEN);
 const express = require('express');
 const cors = require('cors');
 const authRoutes = require('./routes/auth');

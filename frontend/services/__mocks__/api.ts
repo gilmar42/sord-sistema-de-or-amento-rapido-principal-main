@@ -23,4 +23,5 @@ export const apiService = {
   updateSettings: async (settings: any) => settings,
   setToken: () => {},
   clearToken: () => {},
+  createPaymentPreference: jest.fn(async () => ({ initPoint: 'https://mercadopago.com/redirect' })),
 };

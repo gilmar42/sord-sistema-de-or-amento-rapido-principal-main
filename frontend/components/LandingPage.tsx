@@ -21,23 +21,40 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, paymentS
   const [isProcessingPayment, setIsProcessingPayment] = useState(false);
 
   const startPayment = async () => {
+    // eslint-disable-next-line no-console
+    console.log('DEBUG: startPayment called');
     setIsProcessingPayment(true);
+    const idempotencyKey = typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : `sored-${Date.now()}`;
+    let response: any = undefined;
     try {
-      const idempotencyKey = typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : `sored-${Date.now()}`;
-      const response = await apiService.createPaymentPreference(planType, undefined, idempotencyKey);
-      const redirectUrl = response?.initPoint || response?.sandboxInitPoint;
-
-      if (!redirectUrl) {
-        throw new Error('URL de pagamento indisponível.');
-      }
-
-      window.location.href = redirectUrl;
+      response = await apiService.createPaymentPreference(planType, undefined, idempotencyKey);
     } catch (error) {
-      console.error('Erro ao iniciar pagamento:', error);
-      window.alert('Não foi possível iniciar o pagamento no momento. Tente novamente ou contate o suporte.');
-    } finally {
+      // eslint-disable-next-line no-console
+      console.error('Erro ao chamar createPaymentPreference:', error);
       setIsProcessingPayment(false);
+      // eslint-disable-next-line no-console
+      console.log('DEBUG: calling alert in error branch (catch)');
+      window.alert('Não foi possível iniciar o pagamento no momento. Tente novamente ou contate o suporte.');
+      return;
     }
+    if (response == null) {
+      setIsProcessingPayment(false);
+      // eslint-disable-next-line no-console
+      console.log('DEBUG: calling alert in error branch (response == null)');
+      window.alert('Não foi possível iniciar o pagamento no momento. Tente novamente ou contate o suporte.');
+      return;
+    }
+    const redirectUrl = response.initPoint || response.sandboxInitPoint;
+    const isValidUrl = typeof redirectUrl === 'string' && !!redirectUrl.trim();
+    if (!isValidUrl) {
+      setIsProcessingPayment(false);
+      // eslint-disable-next-line no-console
+      console.log('DEBUG: calling alert in error branch (invalid url)');
+      window.alert('Não foi possível iniciar o pagamento no momento. Tente novamente ou contate o suporte.');
+      return;
+    }
+    window.location.assign(redirectUrl);
+    setIsProcessingPayment(false);
   };
 
   const features = [
@@ -105,36 +122,16 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, paymentS
                 </div>
               </div>
             ) : (
-              <>
-                <div className="flex flex-col items-center gap-4 mb-6">
-                  <div className="inline-flex items-center bg-white/10 rounded-full p-1.5 backdrop-blur border border-white/20">
-                    <button
-                      onClick={() => setPlanType('monthly')}
-                      className={`px-8 py-3 rounded-full text-base font-bold transition-all ${planType === 'monthly' ? 'bg-white text-blue-700 shadow-lg' : 'text-white hover:bg-white/10'}`}
-                    >
-                      Plano Mensal · R$100
-                    </button>
-                    <button
-                      onClick={() => setPlanType('annual')}
-                      className={`px-8 py-3 rounded-full text-base font-bold transition-all ${planType === 'annual' ? 'bg-white text-blue-700 shadow-lg' : 'text-white hover:bg-white/10'}`}
-                    >
-                      Plano Anual · R$1100
-                    </button>
-                  </div>
-                  <p className="text-blue-100 text-base font-medium flex items-center gap-3">
-                    <span className="text-lg">💳</span> Cartão de Crédito  •  <span className="text-lg">🔲</span> Pix
-                  </p>
-                </div>
-                <button
-                  onClick={startPayment}
-                  disabled={isProcessingPayment}
-                  className="group relative inline-flex items-center px-8 py-4 text-lg font-semibold text-white bg-linear-to-r from-yellow-400 to-yellow-500 rounded-full hover:from-yellow-500 hover:to-yellow-600 transform hover:scale-105 transition-all duration-300 shadow-2xl hover:shadow-yellow-500/50 animate-fade-in-up animation-delay-400 disabled:opacity-70 disabled:cursor-not-allowed"
-                >
-                  <RocketLaunchIcon className="w-6 h-6 mr-2 group-hover:translate-x-1 transition-transform" />
-                  {isProcessingPayment ? 'Redirecionando...' : 'Começar Agora'}
-                  <span className="absolute inset-0 bg-white opacity-0 group-hover:opacity-20 rounded-full transition-opacity"></span>
-                </button>
-              </>
+              <button
+                type="button"
+                onClick={startPayment}
+                disabled={isProcessingPayment}
+                className="group inline-flex items-center px-8 py-4 text-lg font-semibold text-blue-600 bg-white rounded-full hover:bg-gray-50 transform hover:scale-105 transition-all duration-300 shadow-xl hover:shadow-2xl relative"
+              >
+                <RocketLaunchIcon className="w-6 h-6 mr-2 group-hover:translate-x-1 transition-transform" />
+                {isProcessingPayment ? 'Redirecionando...' : 'Começar Agora'}
+                <span className="absolute inset-0 bg-white opacity-0 group-hover:opacity-20 rounded-full transition-opacity"></span>
+              </button>
             )}
           </div>
         </div>
@@ -143,7 +140,6 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, paymentS
             <path d="M0,64L48,69.3C96,75,192,85,288,80C384,75,480,53,576,48C672,43,768,53,864,64C960,75,1056,85,1152,80C1248,75,1344,53,1392,42.7L1440,32L1440,120L1392,120C1344,120,1248,120,1152,120C1056,120,960,120,864,120C768,120,672,120,576,120C480,120,384,120,288,120C192,120,96,120,48,120L0,120Z"></path>
           </svg>
         </div>
-      </div>
 
       {/* Features Section */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-20">
@@ -158,67 +154,47 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, paymentS
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           {features.map((feature, index) => (
-            <div
-              key={index}
-              className="group relative bg-white dark:bg-slate-800 rounded-2xl p-8 shadow-lg hover:shadow-2xl transform hover:-translate-y-2 transition-all duration-300 border border-gray-100 dark:border-slate-700 animate-fade-in-up"
-              style={{ animationDelay: `${index * 150}ms` }}
-            >
-              <div className={`absolute inset-0 bg-linear-to-br ${feature.color} opacity-0 group-hover:opacity-5 rounded-2xl transition-opacity duration-300`}></div>
-              <div className="relative">
-                <div className="mb-4 transform group-hover:scale-110 transition-transform duration-300">
-                  {feature.icon}
-                </div>
-                <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3">
-                  {feature.title}
-                </h3>
-                <p className="text-gray-600 dark:text-gray-400">
-                  {feature.description}
-                </p>
-              </div>
+            <div key={index} className={`rounded-3xl p-8 shadow-xl bg-linear-to-br ${feature.color} text-white flex flex-col items-center`}>
+              {feature.icon}
+              <h3 className="text-2xl font-bold mt-4 mb-2">{feature.title}</h3>
+              <p className="text-base text-blue-50/90 mb-2 text-center">{feature.description}</p>
             </div>
           ))}
         </div>
-      </div>
-
-      {/* Benefits Section */}
-      <div className="bg-linear-to-r from-blue-50 to-purple-50 dark:from-slate-800 dark:to-slate-900 py-16 sm:py-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-            <div>
-              <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white mb-6">
-                Por que escolher o SORED?
-              </h2>
-              <p className="text-lg text-gray-600 dark:text-gray-400 mb-8">
-                Simplifique sua gestão de orçamentos com uma ferramenta completa e intuitiva
-              </p>
-              <div className="space-y-4">
-                {benefits.map((benefit, index) => (
-                  <div
-                    key={index}
-                    className="flex items-start space-x-3 animate-fade-in-left"
-                    style={{ animationDelay: `${index * 100}ms` }}
-                  >
-                    <CheckCircleIcon className="w-6 h-6 text-green-500 shrink-0 mt-1" />
-                    <span className="text-gray-700 dark:text-gray-300">{benefit}</span>
-                  </div>
-                ))}
-              </div>
+        <div className="mt-16 grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div className="bg-white dark:bg-slate-800 rounded-3xl p-8 shadow-2xl">
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">Por que escolher o SORED?</h2>
+            <p className="text-lg text-gray-600 dark:text-gray-400 mb-8">
+              Simplifique sua gestão de orçamentos com uma ferramenta completa e intuitiva
+            </p>
+            <div className="space-y-4">
+              {benefits.map((benefit, index) => (
+                <div
+                  key={index}
+                  className="flex items-start space-x-3 animate-fade-in-left"
+                  style={{ animationDelay: `${index * 100}ms` }}
+                >
+                  <CheckCircleIcon className="w-6 h-6 text-green-500 shrink-0 mt-1" />
+                  <span className="text-gray-700 dark:text-gray-300">{benefit}</span>
+                </div>
+              ))}
             </div>
-            <div className="relative">
-              <div className="absolute inset-0 bg-linear-to-br from-blue-400 to-purple-600 rounded-3xl transform rotate-3 opacity-20"></div>
-              <div className="relative bg-white dark:bg-slate-800 rounded-3xl p-8 shadow-2xl">
-                <ChartBarIcon className="w-full h-64 text-blue-500 opacity-20" />
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="text-center">
-                    <div className="text-6xl font-bold text-blue-600 dark:text-blue-400 mb-2">86+</div>
-                    <div className="text-xl text-gray-600 dark:text-gray-400">Testes Automatizados</div>
-                    <div className="text-sm text-gray-500 dark:text-gray-500 mt-2">Qualidade Garantida</div>
-                  </div>
+          </div>
+          <div className="relative">
+            <div className="absolute inset-0 bg-linear-to-br from-blue-400 to-purple-600 rounded-3xl transform rotate-3 opacity-20"></div>
+            <div className="relative bg-white dark:bg-slate-800 rounded-3xl p-8 shadow-2xl">
+              <ChartBarIcon className="w-full h-64 text-blue-500 opacity-20" />
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="text-center">
+                  <div className="text-6xl font-bold text-blue-600 dark:text-blue-400 mb-2">86+</div>
+                  <div className="text-xl text-gray-600 dark:text-gray-400">Testes Automatizados</div>
+                  <div className="text-sm text-gray-500 dark:text-gray-500 mt-2">Qualidade Garantida</div>
                 </div>
               </div>
             </div>
           </div>
         </div>
+      </div>
       </div>
 
       {/* CTA Section */}
@@ -241,6 +217,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, paymentS
             </button>
           </div>
         </div>
+
       </div>
     </div>
   );
