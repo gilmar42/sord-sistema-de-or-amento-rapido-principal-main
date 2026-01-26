@@ -30,8 +30,26 @@ app.use(
       'https://sord-sistema-de-or-amento-rapido-pr-seven.vercel.app',
     ],
     credentials: true,
+    optionsSuccessStatus: 200, // Garante que preflight responde 200
   })
 );
+
+// Handler global para preflight OPTIONS (CORS)
+app.options('*', cors({
+  origin: [
+    'http://localhost:3000',
+    'http://127.0.0.1:3000',
+    'http://localhost:5173',
+    'http://127.0.0.1:5173',
+    'http://localhost:4173',
+    'http://127.0.0.1:4173',
+    'http://192.168.0.104:3000',
+    'http://192.168.0.104:5173',
+    'https://sord-sistema-de-or-amento-rapido-pr-seven.vercel.app',
+  ],
+  credentials: true,
+  optionsSuccessStatus: 200,
+}));
 const PORT = process.env.PORT || 5000;
 
 // Middleware
