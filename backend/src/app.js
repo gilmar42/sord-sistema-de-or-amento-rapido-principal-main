@@ -23,6 +23,8 @@ app.use(
       'http://127.0.0.1:3000',
       'http://localhost:5173',
       'http://127.0.0.1:5173',
+      'http://localhost:4173',
+      'http://127.0.0.1:4173',
       'http://192.168.0.104:3000',
       'http://192.168.0.104:5173',
       'https://sord-sistema-de-or-amento-rapido-pr-seven.vercel.app',
