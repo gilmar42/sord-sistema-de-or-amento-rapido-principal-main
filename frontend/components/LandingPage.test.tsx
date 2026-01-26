@@ -46,7 +46,7 @@ describe('LandingPage', () => {
     const button = screen.getByRole('button', { name: /Começar Agora/i });
     fireEvent.click(button);
     
-    expect(mockGetStarted).not.toHaveBeenCalled();
+    expect(mockGetStarted).toHaveBeenCalledTimes(1);
   });
 
   it('should display statistics', () => {

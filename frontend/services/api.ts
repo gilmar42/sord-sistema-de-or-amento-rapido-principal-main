@@ -1,66 +1,52 @@
+
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
 class ApiService {
-  private token: string | null = null;
 
-  constructor() {
-    this.token = localStorage.getItem('auth_token');
-  }
-
-  setToken(token: string) {
-    this.token = token;
-    localStorage.setItem('auth_token', token);
-  }
-
-  clearToken() {
-    this.token = null;
-    localStorage.removeItem('auth_token');
-  }
+  // Token não é mais gerenciado no frontend, cookies httpOnly são usados
 
   private async request(endpoint: string, options: RequestInit = {}) {
     const headers: HeadersInit = {
       'Content-Type': 'application/json',
       ...options.headers,
     };
-
-    if (this.token) {
-      headers['Authorization'] = `Bearer ${this.token}`;
-    }
-
     const response = await fetch(`${API_URL}${endpoint}`, {
       ...options,
       headers,
+      credentials: 'include', // cookies httpOnly
     });
-
     if (!response.ok) {
       const error = await response.json().catch(() => ({ error: 'Network error' }));
       throw new Error(error.error || 'Request failed');
     }
-
     return response.json();
   }
 
   // Auth
   async signup(companyName: string, email: string, password: string) {
-    const data = await this.request('/auth/signup', {
+    return this.request('/auth/signup', {
       method: 'POST',
       body: JSON.stringify({ companyName, email, password }),
     });
-    this.setToken(data.token);
-    return data;
   }
 
   async login(email: string, password: string) {
-    const data = await this.request('/auth/login', {
+    return this.request('/auth/login', {
       method: 'POST',
       body: JSON.stringify({ email, password }),
     });
-    this.setToken(data.token);
-    return data;
   }
 
   async verifyToken() {
     return this.request('/auth/verify');
+  }
+
+  async refresh() {
+    return this.request('/auth/refresh', { method: 'POST' });
+  }
+
+  async logout() {
+    return this.request('/auth/logout', { method: 'POST' });
   }
 
   // Materials
@@ -167,13 +153,7 @@ class ApiService {
     });
   }
 
-  async createPaymentPreference(planType: 'monthly' | 'annual', customerEmail?: string, idempotencyKey?: string) {
-    return this.request('/payments/preference', {
-      method: 'POST',
-      headers: idempotencyKey ? { 'Idempotency-Key': idempotencyKey } : undefined,
-      body: JSON.stringify({ planType, customerEmail }),
-    });
-  }
+
 }
 
 export const apiService = new ApiService();

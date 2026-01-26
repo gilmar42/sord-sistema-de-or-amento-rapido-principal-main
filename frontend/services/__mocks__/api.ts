@@ -1,8 +1,16 @@
 // Simple mock for apiService to avoid network calls in tests.
 export const apiService = {
-  signup: async () => ({ token: 'mock-token' }),
-  login: async () => ({ token: 'mock-token' }),
-  verifyToken: async () => ({ valid: true }),
+  signup: async (companyName, email, password) => {
+    if (email === 'existing@example.com') return {};
+    return { user: { id: 'U-2', email, tenantId: 'T-2' } };
+  },
+  login: async (email, password) => {
+    if (email === 'test@example.com' && password === 'password123') {
+      return { user: { id: 'U-1', email, tenantId: 'T-1' } };
+    }
+    return {};
+  },
+  verifyToken: async () => ({}),
   getMaterials: async () => [],
   createMaterial: async (material: any) => material,
   updateMaterial: async (_id: string, material: any) => material,
@@ -23,5 +31,5 @@ export const apiService = {
   updateSettings: async (settings: any) => settings,
   setToken: () => {},
   clearToken: () => {},
-  createPaymentPreference: jest.fn(async () => ({ initPoint: 'https://mercadopago.com/redirect' })),
+
 };

@@ -9,7 +9,7 @@ import {
   RocketLaunchIcon,
   CheckCircleIcon
 } from './Icons';
-import { apiService } from '../services/api';
+
 
 interface LandingPageProps {
   onGetStarted: () => void;
@@ -19,51 +19,7 @@ interface LandingPageProps {
 export const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, paymentStatus }) => {
   // eslint-disable-next-line no-console
   console.log('[DEBUG] LandingPage montado');
-  const [planType, setPlanType] = useState<'monthly' | 'annual'>('monthly');
-  const [isProcessingPayment, setIsProcessingPayment] = useState(false);
 
-  const startPayment = async () => {
-    // eslint-disable-next-line no-console
-    console.log('DEBUG: startPayment called');
-    setIsProcessingPayment(true);
-    const idempotencyKey = typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : `sored-${Date.now()}`;
-    let response: any = undefined;
-    try {
-      response = await apiService.createPaymentPreference(planType, undefined, idempotencyKey);
-    } catch (error) {
-      // eslint-disable-next-line no-console
-      console.error('Erro ao chamar createPaymentPreference:', error);
-      setIsProcessingPayment(false);
-      // eslint-disable-next-line no-console
-      console.log('[DEBUG] Exceção no startPayment:', error);
-      // eslint-disable-next-line no-console
-      console.log('DEBUG: calling alert in error branch (catch)');
-      window.alert('Não foi possível iniciar o pagamento no momento. Tente novamente ou contate o suporte.');
-      return;
-    }
-    if (response == null) {
-      setIsProcessingPayment(false);
-      // eslint-disable-next-line no-console
-      console.log('[DEBUG] Erro: response == null');
-      // eslint-disable-next-line no-console
-      console.log('DEBUG: calling alert in error branch (response == null)');
-      window.alert('Não foi possível iniciar o pagamento no momento. Tente novamente ou contate o suporte.');
-      return;
-    }
-    const redirectUrl = response.initPoint || response.sandboxInitPoint;
-    const isValidUrl = typeof redirectUrl === 'string' && !!redirectUrl.trim();
-    if (!isValidUrl) {
-      setIsProcessingPayment(false);
-      // eslint-disable-next-line no-console
-      console.log('[DEBUG] Erro: redirectUrl inválido', redirectUrl);
-      // eslint-disable-next-line no-console
-      console.log('DEBUG: calling alert in error branch (invalid url)');
-      window.alert('Não foi possível iniciar o pagamento no momento. Tente novamente ou contate o suporte.');
-      return;
-    }
-    window.location.assign(redirectUrl);
-    setIsProcessingPayment(false);
-  };
 
   const features = [
     {
@@ -132,12 +88,11 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, paymentS
             ) : (
               <button
                 type="button"
-                onClick={startPayment}
-                disabled={isProcessingPayment}
+                onClick={onGetStarted}
                 className="group inline-flex items-center px-8 py-4 text-lg font-semibold text-blue-600 bg-white rounded-full hover:bg-gray-50 transform hover:scale-105 transition-all duration-300 shadow-xl hover:shadow-2xl relative"
               >
                 <RocketLaunchIcon className="w-6 h-6 mr-2 group-hover:translate-x-1 transition-transform" />
-                {isProcessingPayment ? 'Redirecionando...' : 'Começar Agora'}
+                {'Começar Agora'}
                 <span className="absolute inset-0 bg-white opacity-0 group-hover:opacity-20 rounded-full transition-opacity"></span>
               </button>
             )}

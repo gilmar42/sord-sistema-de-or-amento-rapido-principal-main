@@ -20,11 +20,12 @@ interface MainLayoutProps {
   initialView?: View;
 }
 
-export const MainLayout: React.FC<MainLayoutProps> = ({ initialView }) => {
+const MainLayout: React.FC<MainLayoutProps> = ({ initialView }) => {
   const [currentView, setCurrentView] = useState<View>(initialView ?? 'home');
   const [quoteToEdit, setQuoteToEdit] = useState<Quote | null>(null);
-  const { logout } = useAuth();
+  const { currentUser, isLoading, login, logout } = useAuth();
   const { isDark, toggleDarkMode } = useDarkMode();
+  const [loginState, setLoginState] = useState({ email: '', password: '', error: '' });
 
   React.useEffect(() => {
     if (initialView) {
@@ -51,7 +52,8 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ initialView }) => {
       case 'home':
         return <LandingPage onGetStarted={handleGetStarted} />;
       case 'calculator':
-          return <QuoteCalculator data-testid="quote-calculator" quoteToEdit={quoteToEdit} setQuoteToEdit={setQuoteToEdit} onNavigateToMaterials={() => setCurrentView('materials')} />;
+        // Adiciona data-testid para testes
+        return <QuoteCalculator quoteToEdit={quoteToEdit} setQuoteToEdit={setQuoteToEdit} onNavigateToMaterials={() => setCurrentView('materials')} />;
       case 'hourly':
         return <HourlyQuote />;
       case 'machine':
@@ -68,8 +70,47 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ initialView }) => {
         return <LandingPage onGetStarted={handleGetStarted} />;
     }
   };
-  
 
+  // Tela de login simples
+  if (!isLoading && !currentUser) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-ice-50 dark:bg-slate-900">
+        <form
+          className="bg-white dark:bg-slate-800 rounded-2xl shadow-xl p-8 w-full max-w-sm flex flex-col gap-4"
+          onSubmit={async e => {
+            e.preventDefault();
+            setLoginState(s => ({ ...s, error: '' }));
+            const ok = await login(loginState.email, loginState.password);
+            if (!ok) setLoginState(s => ({ ...s, error: 'Credenciais inválidas' }));
+          }}
+        >
+          <h2 className="text-2xl font-bold text-center mb-2 text-blue-700 dark:text-blue-200">Login SORED</h2>
+          <input
+            type="email"
+            placeholder="E-mail"
+            className="rounded px-3 py-2 border border-gray-300 dark:bg-slate-700 dark:text-white"
+            value={loginState.email}
+            onChange={e => setLoginState(s => ({ ...s, email: e.target.value }))}
+            required
+          />
+          <input
+            type="password"
+            placeholder="Senha"
+            className="rounded px-3 py-2 border border-gray-300 dark:bg-slate-700 dark:text-white"
+            value={loginState.password}
+            onChange={e => setLoginState(s => ({ ...s, password: e.target.value }))}
+            required
+          />
+          {loginState.error && <div className="text-red-500 text-sm text-center">{loginState.error}</div>}
+          <button
+            type="submit"
+            className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 rounded transition-all"
+            disabled={isLoading}
+          >Entrar</button>
+        </form>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col md:flex-row min-h-screen bg-ice-50 dark:bg-slate-900 transition-all duration-300 ease-in-out">
@@ -126,3 +167,5 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ initialView }) => {
       </div>
   );
 };
+
+export { MainLayout };

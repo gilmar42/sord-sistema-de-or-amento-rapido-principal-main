@@ -52,7 +52,7 @@ export const MaterialManagement: React.FC<MaterialManagementProps> = ({ activeVi
       <div className="max-w-7xl mx-auto">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 space-y-4 sm:space-y-0">
           <div>
-            <h2 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-primary to-blue-600 bg-clip-text text-transparent flex items-center">
+            <h2 className="text-2xl sm:text-3xl font-bold bg-linear-to-r from-primary to-blue-600 bg-clip-text text-transparent flex items-center">
               <BoxIcon className="w-8 h-8 mr-3 text-primary" />
               Materiais e Componentes
             </h2>
@@ -63,7 +63,7 @@ export const MaterialManagement: React.FC<MaterialManagementProps> = ({ activeVi
 
           <button
             onClick={handleAddClick}
-            className="bg-gradient-to-r from-primary to-blue-600 text-white px-6 py-3 rounded-xl font-semibold flex items-center space-x-2 hover:scale-105 active:scale-95 transition-all duration-300 ease-in-out shadow-lg hover:shadow-xl group"
+            className="bg-linear-to-r from-primary to-blue-600 text-white px-6 py-3 rounded-xl font-semibold flex items-center space-x-2 hover:scale-105 active:scale-95 transition-all duration-300 ease-in-out shadow-lg hover:shadow-xl group"
           >
             <PlusIcon className="w-5 h-5 group-hover:rotate-90 transition-transform duration-300" />
             <span>Novo Material</span>
@@ -80,7 +80,7 @@ export const MaterialManagement: React.FC<MaterialManagementProps> = ({ activeVi
               <p className="text-textSecondary dark:text-slate-400 mb-6">Comece criando seu primeiro material para orçamentos</p>
               <button
                 onClick={handleAddClick}
-                className="bg-gradient-to-r from-primary to-blue-600 text-white px-6 py-3 rounded-lg font-medium hover:scale-105 transition-all duration-300 shadow-lg"
+                className="bg-linear-to-r from-primary to-blue-600 text-white px-6 py-3 rounded-lg font-medium hover:scale-105 transition-all duration-300 shadow-lg"
               >
                 Criar Primeiro Material
               </button>
@@ -90,7 +90,7 @@ export const MaterialManagement: React.FC<MaterialManagementProps> = ({ activeVi
               {materials.map((material, index) => (
                 <div 
                   key={material.id} 
-                  className="border border-border dark:border-slate-600 rounded-xl p-6 bg-gradient-to-br from-background to-gray-50 dark:from-slate-700 dark:to-slate-600 hover:scale-105 transition-all duration-300 ease-in-out shadow-lg hover:shadow-xl card-hover animate-slide-in-left"
+                  className="border border-border dark:border-slate-600 rounded-xl p-6 bg-linear-to-br from-background to-gray-50 dark:from-slate-700 dark:to-slate-600 hover:scale-105 transition-all duration-300 ease-in-out shadow-lg hover:shadow-xl card-hover animate-slide-in-left"
                   style={{ animationDelay: `${index * 100}ms` }}
                 >
                   <div className="flex justify-between items-center mb-2">

@@ -16,7 +16,7 @@ jest.mock('@/context/DataContext', () => ({
 
 jest.mock('@/context/AuthContext', () => ({
     useAuth: () => ({
-        currentUser: { uid: 'test-uid', tenantId: 'test-tenant-id' },
+        currentUser: { id: 'test-uid', tenantId: 'test-tenant-id', email: 'test@mock.com', passwordHash: 'hashed' },
     }),
 }));
 

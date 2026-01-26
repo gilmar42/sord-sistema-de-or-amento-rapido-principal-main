@@ -15,6 +15,7 @@ jest.mock('../../context/AuthContext', () => ({
       id: 'test-user-id',
       email: 'test@example.com',
       tenantId: 'test-tenant-id',
+      passwordHash: 'hashed',
     },
   }),
   AuthProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
@@ -47,7 +48,7 @@ describe('DataContext - Testes de Produção', () => {
   });
 
   const wrapper = ({ children }: { children: React.ReactNode }) => (
-    <DataProvider testCurrentUser={{ id: 'test-user-id', tenantId: 'test-tenant-id' }}>
+    <DataProvider testCurrentUser={{ id: 'test-user-id', tenantId: 'test-tenant-id', email: 'test@example.com', passwordHash: 'hashed' }}>
       {children}
     </DataProvider>
   );

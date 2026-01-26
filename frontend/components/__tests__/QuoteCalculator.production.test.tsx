@@ -17,6 +17,7 @@ jest.mock('../../context/AuthContext', () => ({
       id: 'test-user-id',
       email: 'test@example.com',
       tenantId: 'test-tenant-id',
+      passwordHash: 'hashed',
     },
   }),
   AuthProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,

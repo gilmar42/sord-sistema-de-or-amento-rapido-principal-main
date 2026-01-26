@@ -1,13 +1,15 @@
 
+
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import type { ReactNode } from 'react';
 import type { User } from '../types';
+import { apiService } from '../services/api';
 
 interface AuthContextType {
   currentUser: User | null;
   tenantId: string | null;
   login: (email: string, password: string) => Promise<boolean>;
-  logout: () => void;
+  logout: () => Promise<void>;
   signup: (companyName: string, email: string, password: string) => Promise<boolean>;
   isLoading: boolean;
 }
@@ -18,83 +20,77 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  const hashPassword = (password: string) => `hashed_${password}`;
 
-  const readJson = <T,>(key: string, fallback: T): T => {
-    try {
-      const raw = localStorage.getItem(key);
-      return raw ? (JSON.parse(raw) as T) : fallback;
-    } catch {
-      return fallback;
-    }
-  };
-
+  // Checa sessão no backend ao montar
   useEffect(() => {
-    const session = readJson<User | null>('sored_session', null);
-    if (session) {
-      setCurrentUser(session);
-    }
-    setIsLoading(false);
+    const checkSession = async () => {
+      try {
+        const data = await apiService.verifyToken();
+        if (data && data.user) {
+          setCurrentUser({
+            id: data.user.id,
+            email: data.user.email,
+            tenantId: data.user.tenantId,
+            // passwordHash não é retornado do backend
+          });
+        } else {
+          setCurrentUser(null);
+        }
+      } catch {
+        setCurrentUser(null);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    checkSession();
   }, []);
 
-  const persistSession = (user: User) => {
-    const session = { id: user.id, email: user.email, tenantId: user.tenantId } as User;
-    localStorage.setItem('sored_session', JSON.stringify(session));
-    setCurrentUser(session);
-  };
 
   const login = async (email: string, password: string): Promise<boolean> => {
     try {
-      const users = readJson<User[]>('sored_users', []);
-      const user = users.find(u => u.email === email);
-      if (!user) return false;
-      if (user.passwordHash !== hashPassword(password)) return false;
-      persistSession(user);
-      return true;
+      const data = await apiService.login(email, password);
+      if (data && data.user) {
+        setCurrentUser({
+          id: data.user.id,
+          email: data.user.email,
+          tenantId: data.user.tenantId,
+        });
+        return true;
+      }
+      return false;
     } catch (error) {
       console.error('Login error:', error);
       return false;
     }
   };
 
+
   const signup = async (companyName: string, email: string, password: string): Promise<boolean> => {
     try {
-      const users = readJson<User[]>('sored_users', []);
-      const tenants = readJson<any[]>('sored_tenants', []);
-
-      if (users.some(u => u.email === email)) {
-        console.error('User already exists');
-        return false;
+      const data = await apiService.signup(companyName, email, password);
+      if (data && data.user) {
+        setCurrentUser({
+          id: data.user.id,
+          email: data.user.email,
+          tenantId: data.user.tenantId,
+        });
+        return true;
       }
-
-      const newTenantId = `T-${Date.now()}`;
-      const newUserId = `U-${Date.now()}`;
-
-      const newUser: User = {
-        id: newUserId,
-        email,
-        tenantId: newTenantId,
-        passwordHash: hashPassword(password),
-      };
-
-      users.push(newUser);
-      tenants.push({ id: newTenantId, companyName });
-
-      localStorage.setItem('sored_users', JSON.stringify(users));
-      localStorage.setItem('sored_tenants', JSON.stringify(tenants));
-
-      persistSession(newUser);
-      return true;
+      return false;
     } catch (error) {
       console.error('Signup error:', error);
       return false;
     }
   };
 
-  const logout = () => {
-    localStorage.removeItem('sored_session');
+
+  const logout = async () => {
+    try {
+      await apiService.logout();
+    } catch {}
     setCurrentUser(null);
   };
+
 
   return (
     <AuthContext.Provider value={{ currentUser, tenantId: currentUser?.tenantId ?? null, login, logout, signup, isLoading }}>

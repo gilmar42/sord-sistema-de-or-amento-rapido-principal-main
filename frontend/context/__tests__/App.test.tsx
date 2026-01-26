@@ -67,7 +67,7 @@ describe('App Integration Tests', () => {
 
   it('should render LandingPage first when authenticated user logs in', () => {
     mockUseAuth.mockReturnValue({
-      currentUser: { id: 'U-1', email: 'test@example.com', tenantId: 'T-1' },
+      currentUser: { id: 'U-1', email: 'test@example.com', tenantId: 'T-1', passwordHash: 'hashed' },
       tenantId: 'T-1',
       login: jest.fn(),
       signup: jest.fn(),

@@ -4,7 +4,20 @@ import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom';
 
 import { MainLayout } from './MainLayout';
-import { AuthProvider } from '../context/AuthContext';
+import { AuthContext } from '../context/AuthContext';
+// Mock AuthProvider para garantir usuário autenticado
+const MockAuthProvider: React.FC<{children: React.ReactNode}> = ({ children }) => (
+  <AuthContext.Provider value={{
+    currentUser: { id: 'u1', email: 'user@mock.com', tenantId: 't1', passwordHash: 'hashed' },
+    tenantId: 't1',
+    login: jest.fn(),
+    logout: jest.fn(),
+    signup: jest.fn(),
+    isLoading: false
+  }}>
+    {children}
+  </AuthContext.Provider>
+);
 import { DataContext } from '../context/DataContext';
 import type { Material, AppSettings, Category, Quote } from '../types';
 
@@ -47,11 +60,11 @@ describe('MainLayout varied data scenarios', () => {
     } as any;
 
     render(
-      <AuthProvider>
+      <MockAuthProvider>
         <DataContext.Provider value={mockData}>
           <MainLayout />
         </DataContext.Provider>
-      </AuthProvider>
+      </MockAuthProvider>
     );
 
     const novoBtn = screen.getByRole('button', { name: /Novo Orçamento/i });
@@ -81,11 +94,11 @@ describe('MainLayout varied data scenarios', () => {
     } as any;
 
     render(
-      <AuthProvider>
+      <MockAuthProvider>
         <DataContext.Provider value={mockData}>
           <MainLayout />
         </DataContext.Provider>
-      </AuthProvider>
+      </MockAuthProvider>
     );
 
     const materiaisBtn = screen.getByRole('button', { name: /Materiais/i });
@@ -119,11 +132,11 @@ describe('MainLayout varied data scenarios', () => {
     } as any;
 
     render(
-      <AuthProvider>
+      <MockAuthProvider>
         <DataContext.Provider value={mockData}>
           <MainLayout />
         </DataContext.Provider>
-      </AuthProvider>
+      </MockAuthProvider>
     );
 
     const materiaisBtn = screen.getByRole('button', { name: /Materiais/i });

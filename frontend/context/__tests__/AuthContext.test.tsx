@@ -1,68 +1,38 @@
-import { render, screen, act } from '@testing-library/react';
-import { AuthProvider, useAuth } from '../AuthContext';
-import React from 'react';
+import { render, act, waitFor } from '@testing-library/react';
+// import duplicado removido
+// import React removido, não utilizado
 
-// Mock useLocalStorage hook
-const localStorageMock = (() => {
-  let store = {};
+// Mock apiService
+jest.mock('../../services/api', () => {
   return {
-    getItem: jest.fn((key) => store[key] || null),
-    setItem: jest.fn((key, value) => {
-      store[key] = value.toString();
-    }),
-    removeItem: jest.fn((key) => {
-      delete store[key];
-    }),
-    clear: jest.fn(() => {
-      store = {};
-    }),
-    _getStore: () => store, // Helper for testing
-    _setStore: (newStore) => {
-      store = newStore;
-    }, // Helper for testing
-  };
-})();
-
-Object.defineProperty(window, 'localStorage', {
-  value: localStorageMock,
-});
-
-jest.mock('../../hooks/useLocalStorage', () => {
-  const React = require('react');
-  return {
-    useLocalStorage: jest.fn((key, initialValue) => {
-      const storedValue = localStorageMock.getItem(key);
-      const initial = storedValue ? JSON.parse(storedValue) : initialValue;
-      const [value, setValue] = React.useState(initial);
-
-      const setLocalValue = (newValue) => {
-        setValue(newValue);
-        localStorageMock.setItem(key, JSON.stringify(newValue));
-      };
-      return [value, setLocalValue];
-    }),
+    apiService: {
+      login: jest.fn(),
+      signup: jest.fn(),
+      logout: jest.fn(),
+      verifyToken: jest.fn(),
+    },
   };
 });
 
 describe('AuthContext', () => {
+  const { apiService } = require('../../services/api');
+
   beforeEach(() => {
-    localStorageMock.clear();
     jest.clearAllMocks();
   });
 
   it('should provide default auth values', () => {
-    let auth;
+    let auth: any;
+    apiService.verifyToken.mockResolvedValue({});
     const TestComponent = () => {
       auth = useAuth();
       return null;
     };
-
     render(
       <AuthProvider>
         <TestComponent />
       </AuthProvider>
     );
-
     expect(auth).toBeDefined();
     expect(auth.currentUser).toBeNull();
     expect(typeof auth.login).toBe('function');
@@ -71,171 +41,137 @@ describe('AuthContext', () => {
   });
 
   it('should log in a user with correct credentials', async () => {
-    localStorageMock.setItem('sored_users', JSON.stringify([
-      { id: 'U-1', email: 'test@example.com', passwordHash: 'hashed_password123', tenantId: 'T-1' }
-    ]));
-
-    let auth;
-    const TestComponent = () => {
-      auth = useAuth();
+    const user = { id: 'U-1', email: 'test@example.com', tenantId: 'T-1', passwordHash: 'hashed' };
+    apiService.login.mockResolvedValue({ user });
+    apiService.verifyToken.mockResolvedValueOnce({});
+    let authInstance;
+    function TestComponent() {
+      const auth = useAuth();
+      authInstance = auth;
       return null;
-    };
-
+    }
     render(
       <AuthProvider>
         <TestComponent />
       </AuthProvider>
     );
-
     let loginSuccess;
     await act(async () => {
-      loginSuccess = await auth.login('test@example.com', 'password123');
+      loginSuccess = await authInstance.login('test@example.com', 'password123');
     });
-
+    await waitFor(() => {
+      expect(authInstance.currentUser).toEqual({ id: user.id, email: user.email, tenantId: user.tenantId });
+    });
     expect(loginSuccess).toBe(true);
-    expect(localStorageMock.getItem('sored_session')).toEqual(JSON.stringify({ id: 'U-1', email: 'test@example.com', tenantId: 'T-1' }));
   });
 
-  it('should not log in a user with incorrect password', async () => {
-    localStorageMock.setItem('sored_users', JSON.stringify([
-      { id: 'U-1', email: 'test@example.com', passwordHash: 'hashed_correct_password', tenantId: 'T-1' }
-    ]));
-
-    let auth;
+  it('should not log in a user with incorrect credentials', async () => {
+    let auth: any;
+    apiService.login.mockResolvedValue({});
+    apiService.verifyToken.mockResolvedValue({});
     const TestComponent = () => {
       auth = useAuth();
       return null;
     };
-
     render(
       <AuthProvider>
         <TestComponent />
       </AuthProvider>
     );
-
     let loginSuccess;
     await act(async () => {
-      loginSuccess = await auth.login('test@example.com', 'incorrect_password');
+      loginSuccess = await auth.login('test@example.com', 'wrongpassword');
     });
-
     expect(loginSuccess).toBe(false);
-    expect(localStorageMock.getItem('sored_session')).toBeNull();
-  });
-
-  it('should not log in a non-existent user', async () => {
-    localStorageMock.setItem('sored_users', JSON.stringify([])); // No users in storage
-
-    let auth;
-    const TestComponent = () => {
-      auth = useAuth();
-      return null;
-    };
-
-    render(
-      <AuthProvider>
-        <TestComponent />
-      </AuthProvider>
-    );
-
-    let loginSuccess;
-    await act(async () => {
-      loginSuccess = await auth.login('nonexistent@example.com', 'password123');
-    });
-
-    expect(loginSuccess).toBe(false);
-    expect(localStorageMock.getItem('sored_session')).toBeNull();
+    expect(auth.currentUser).toBeNull();
   });
 
   it('should log out a user', async () => {
-    const currentUser = { id: 'U-1', email: 'test@example.com', tenantId: 'T-1' };
-    localStorageMock.setItem('sored_session', JSON.stringify(currentUser));
-
-    let auth;
+    let auth: any;
+    const user = { id: 'U-1', email: 'test@example.com', tenantId: 'T-1', passwordHash: 'hashed' };
+    apiService.verifyToken.mockResolvedValue({ user });
+    apiService.logout.mockResolvedValue({});
     const TestComponent = () => {
       auth = useAuth();
       return null;
     };
-
     render(
       <AuthProvider>
         <TestComponent />
       </AuthProvider>
     );
-
-    // Initially, currentUser should be set
-    expect(auth.currentUser).toEqual(currentUser);
-
+    // Simula login
+    act(() => {
+      auth.currentUser = user;
+    });
     await act(async () => {
       await auth.logout();
     });
-
-    // After logout, currentUser should be null
     expect(auth.currentUser).toBeNull();
   });
 
   it('should sign up a new user and tenant', async () => {
-    let auth;
-    const TestComponent = () => {
-      auth = useAuth();
+    const user = { id: 'U-2', email: 'newuser@example.com', tenantId: 'T-2', passwordHash: 'hashed' };
+    apiService.signup.mockResolvedValue({ user });
+    apiService.verifyToken.mockResolvedValueOnce({});
+    let authInstance;
+    function TestComponent() {
+      const auth = useAuth();
+      authInstance = auth;
       return null;
-    };
-
+    }
     render(
       <AuthProvider>
         <TestComponent />
       </AuthProvider>
     );
-
     let signupSuccess;
     await act(async () => {
-      signupSuccess = await auth.signup('New Tenant', 'newuser@example.com', 'password123');
+      signupSuccess = await authInstance.signup('New Tenant', 'newuser@example.com', 'password123');
     });
-
+    await waitFor(() => {
+      expect(authInstance.currentUser).toEqual({ id: user.id, email: user.email, tenantId: user.tenantId });
+    });
     expect(signupSuccess).toBe(true);
-    const users = JSON.parse(localStorageMock.getItem('sored_users') || '[]');
-    const tenants = JSON.parse(localStorageMock.getItem('sored_tenants') || '[]');
-    const session = JSON.parse(localStorageMock.getItem('sored_session') || 'null');
-
-    expect(users.length).toBe(1);
-    expect(tenants.length).toBe(1);
-    expect(session).not.toBeNull();
-    expect(users[0].email).toBe('newuser@example.com');
-    expect(tenants[0].companyName).toBe('New Tenant');
-    expect(session.email).toBe('newuser@example.com');
   });
 
   it('should not sign up a user with an existing email', async () => {
-    const mockedConsoleError = jest.spyOn(console, 'error').mockImplementation(() => {});
-    const existingUser = { id: 'U-1', email: 'existing@example.com', passwordHash: 'hashed_password', tenantId: 'T-1' };
-    localStorageMock.setItem('sored_users', JSON.stringify([existingUser]));
-
-    let auth;
+    let auth: any;
+    apiService.signup.mockResolvedValue({});
+    apiService.verifyToken.mockResolvedValue({});
     const TestComponent = () => {
       auth = useAuth();
       return null;
     };
-
     render(
       <AuthProvider>
         <TestComponent />
       </AuthProvider>
     );
-
     let signupSuccess;
     await act(async () => {
       signupSuccess = await auth.signup('Existing Tenant', 'existing@example.com', 'password123');
     });
-
     expect(signupSuccess).toBe(false);
-    expect(mockedConsoleError).toHaveBeenCalledWith('User already exists');
-    mockedConsoleError.mockRestore();
-
-    const users = JSON.parse(localStorageMock.getItem('sored_users') || '[]');
-    const tenants = JSON.parse(localStorageMock.getItem('sored_tenants') || '[]');
-    const session = JSON.parse(localStorageMock.getItem('sored_session') || 'null');
-
-    expect(users.length).toBe(1);
-    expect(tenants.length).toBe(0);
-    expect(localStorageMock.getItem('sored_session')).toBeNull();
+    expect(auth.currentUser).toBeNull();
   });
+});
+// import duplicado removido
+
+
+import { AuthProvider, useAuth } from '../AuthContext';
+import React from 'react';
+
+
+// Mock apiService
+jest.mock('../../services/api', () => {
+  return {
+    apiService: {
+      login: jest.fn(),
+      signup: jest.fn(),
+      logout: jest.fn(),
+      verifyToken: jest.fn(),
+    },
+  };
+
 });

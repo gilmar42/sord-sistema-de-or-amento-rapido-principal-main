@@ -3,9 +3,15 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const db = require('../config/database');
 const { JWT_SECRET } = require('../middleware/auth');
+const crypto = require('crypto');
 const { sendWelcomeEmail } = require('../services/emailService');
 
 const router = express.Router();
+
+// Utilitário para gerar refresh token seguro
+function generateRefreshToken() {
+  return crypto.randomBytes(64).toString('hex');
+}
 
 // Signup
 router.post('/signup', async (req, res) => {
@@ -64,11 +70,16 @@ router.post('/signup', async (req, res) => {
       userId,
     }).catch((err) => console.error('Failed to send welcome email:', err));
 
-    // Generate token
+    // Generate tokens
     const token = jwt.sign({ userId, email, tenantId }, JWT_SECRET, { expiresIn: '7d' });
+    const refreshToken = generateRefreshToken();
+    const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(); // 30 dias
+    db.prepare('INSERT INTO refresh_tokens (id, user_id, token, expires_at) VALUES (?, ?, ?, ?)')
+      .run(`RT-${Date.now()}`, userId, refreshToken, expiresAt);
 
+    res.cookie('token', token, { httpOnly: true, sameSite: 'lax', maxAge: 7 * 24 * 60 * 60 * 1000 });
+    res.cookie('refreshToken', refreshToken, { httpOnly: true, sameSite: 'lax', maxAge: 30 * 24 * 60 * 60 * 1000 });
     res.json({
-      token,
       user: {
         id: userId,
         email,
@@ -102,21 +113,73 @@ router.post('/login', async (req, res) => {
       return res.status(401).json({ error: 'Invalid credentials' });
     }
 
-    // Generate token
+    // Generate tokens
     const token = jwt.sign(
       { userId: user.id, email: user.email, tenantId: user.tenant_id },
       JWT_SECRET,
       { expiresIn: '7d' }
     );
+    const refreshToken = generateRefreshToken();
+    const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(); // 30 dias
+    db.prepare('INSERT INTO refresh_tokens (id, user_id, token, expires_at) VALUES (?, ?, ?, ?)')
+      .run(`RT-${Date.now()}`, user.id, refreshToken, expiresAt);
 
+    res.cookie('token', token, { httpOnly: true, sameSite: 'lax', maxAge: 7 * 24 * 60 * 60 * 1000 });
+    res.cookie('refreshToken', refreshToken, { httpOnly: true, sameSite: 'lax', maxAge: 30 * 24 * 60 * 60 * 1000 });
     res.json({
-      token,
       user: {
         id: user.id,
         email: user.email,
         tenantId: user.tenant_id,
       },
     });
+  // Refresh token endpoint
+  router.post('/refresh', (req, res) => {
+    try {
+      const refreshToken = req.cookies?.refreshToken || req.body.refreshToken;
+      if (!refreshToken) {
+        return res.status(401).json({ error: 'No refresh token provided' });
+      }
+      const row = db.prepare('SELECT * FROM refresh_tokens WHERE token = ?').get(refreshToken);
+      if (!row || new Date(row.expires_at) < new Date()) {
+        return res.status(401).json({ error: 'Invalid or expired refresh token' });
+      }
+      const user = db.prepare('SELECT * FROM users WHERE id = ?').get(row.user_id);
+      if (!user) {
+        return res.status(401).json({ error: 'User not found' });
+      }
+      const token = jwt.sign(
+        { userId: user.id, email: user.email, tenantId: user.tenant_id },
+        JWT_SECRET,
+        { expiresIn: '7d' }
+      );
+      res.cookie('token', token, { httpOnly: true, sameSite: 'lax', maxAge: 7 * 24 * 60 * 60 * 1000 });
+      res.json({
+        user: {
+          id: user.id,
+          email: user.email,
+          tenantId: user.tenant_id,
+        },
+      });
+    } catch (error) {
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  });
+
+  // Logout endpoint
+  router.post('/logout', (req, res) => {
+    try {
+      const refreshToken = req.cookies?.refreshToken || req.body.refreshToken;
+      if (refreshToken) {
+        db.prepare('DELETE FROM refresh_tokens WHERE token = ?').run(refreshToken);
+      }
+      res.clearCookie('token');
+      res.clearCookie('refreshToken');
+      res.json({ message: 'Logged out' });
+    } catch (error) {
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  });
   } catch (error) {
     console.error('Login error:', error);
     res.status(500).json({ error: 'Internal server error' });
