@@ -9,12 +9,13 @@ interface AuthPageProps {
 export const AuthPage: React.FC<AuthPageProps> = ({ paymentApproved = false }) => {
   const [isLoginView, setIsLoginView] = useState(!paymentApproved);
   const { login, signup } = useAuth();
-  
+
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [companyName, setCompanyName] = useState('');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   useEffect(() => {
     if (paymentApproved) {
@@ -110,14 +111,29 @@ export const AuthPage: React.FC<AuthPageProps> = ({ paymentApproved = false }) =
               <label className="block text-textSecondary dark:text-slate-300 text-sm font-bold mb-2" htmlFor="password">
                 Senha
               </label>
-              <input
-                id="password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="bg-gray-700 dark:bg-slate-700 shadow appearance-none border border-gray-600 dark:border-slate-600 rounded w-full py-2 px-3 text-textPrimary dark:text-slate-100 mb-3 leading-tight focus:outline-none focus:ring-2 focus:ring-primary"
-                required
-              />
+              <div className="relative">
+                <input
+                  id="password"
+                  type={showPassword ? 'text' : 'password'}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="bg-gray-700 dark:bg-slate-700 shadow appearance-none border border-gray-600 dark:border-slate-600 rounded w-full py-2 px-3 text-textPrimary dark:text-slate-100 mb-3 leading-tight focus:outline-none focus:ring-2 focus:ring-primary pr-10"
+                  required
+                />
+                <button
+                  type="button"
+                  tabIndex={-1}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-200 dark:hover:text-slate-100 focus:outline-none"
+                  onClick={() => setShowPassword((v) => !v)}
+                  aria-label={showPassword ? 'Ocultar senha' : 'Mostrar senha'}
+                >
+                  {showPassword ? (
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-5.523 0-10-4.477-10-10 0-1.657.402-3.221 1.125-4.575m2.122-2.122A9.956 9.956 0 0112 3c5.523 0 10 4.477 10 10 0 1.657-.402 3.221-1.125 4.575m-2.122 2.122A9.956 9.956 0 0112 21c-5.523 0-10-4.477-10-10 0-1.657.402-3.221 1.125-4.575" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                  ) : (
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-5.523 0-10-4.477-10-10 0-1.657.402-3.221 1.125-4.575m2.122-2.122A9.956 9.956 0 0112 3c5.523 0 10 4.477 10 10 0 1.657-.402 3.221-1.125 4.575m-2.122 2.122A9.956 9.956 0 0112 21c-5.523 0-10-4.477-10-10 0-1.657.402-3.221 1.125-4.575" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                  )}
+                </button>
+              </div>
             </div>
             {error && <p className="text-red-500 text-xs italic mb-4">{error}</p>}
             <div className="flex items-center justify-between">
