@@ -8,10 +8,12 @@ const quotesRoutes = require('./routes/quotes');
 const clientsRoutes = require('./routes/clients');
 const categoriesRoutes = require('./routes/categories');
 const settingsRoutes = require('./routes/settings');
-const paymentsRoutes = require('./routes/payments');
+const paymentsRoutes = require('./routes/payment');
 
-// Initialize database
+
+// Inicializa SQLite (dados locais) e MongoDB (pagamentos SaaS)
 require('./config/database');
+require('./config/mongo')();
 
 const app = express();
 
@@ -54,7 +56,9 @@ const PORT = process.env.PORT || 5000;
 
 // Middleware
 
-app.use('/api/payments/webhook', express.raw({ type: '*/*' }));
+
+// Webhook precisa receber raw body para validação de assinatura (se necessário)
+app.use('/api/payments/webhooks', express.raw({ type: '*/*' }));
 app.use(express.json({ limit: '10mb' }));
 
 // Health check
