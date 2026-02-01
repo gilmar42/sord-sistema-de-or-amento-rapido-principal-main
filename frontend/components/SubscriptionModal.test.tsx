@@ -58,4 +58,13 @@ describe('SubscriptionModal', () => {
     fireEvent.click(screen.getByText(/Assinar/i));
     await waitFor(() => expect(screen.getByText(/Erro ao assinar/i)).toBeInTheDocument());
   });
+
+  it('deve usar plano pré-selecionado quando fornecido', async () => {
+    render(<SubscriptionModal open={true} onClose={() => {}} preSelectedPlan="annual" />);
+    await waitFor(() => {
+      // Verifica se o botão anual está selecionado
+      const annualButton = screen.getByText(/Anual R\$1100/i);
+      expect(annualButton).toHaveClass('bg-blue-500');
+    });
+  });
 });

@@ -89,10 +89,11 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, paymentS
               <button
                 type="button"
                 onClick={onGetStarted}
+                data-testid="cta-hero-plans"
                 className="group inline-flex items-center px-8 py-4 text-lg font-semibold text-blue-600 bg-white rounded-full hover:bg-gray-50 transform hover:scale-105 transition-all duration-300 shadow-xl hover:shadow-2xl relative"
               >
                 <RocketLaunchIcon className="w-6 h-6 mr-2 group-hover:translate-x-1 transition-transform" />
-                {'Começar Agora'}
+                {'Ver Planos'}
                 <span className="absolute inset-0 bg-white opacity-0 group-hover:opacity-20 rounded-full transition-opacity"></span>
               </button>
             )}
@@ -171,13 +172,16 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, paymentS
             <p className="text-xl text-blue-100 mb-8 max-w-2xl mx-auto">
               Crie seu primeiro orçamento em minutos e veja como é fácil gerenciar seus projetos
             </p>
-            <button
-              onClick={onGetStarted}
-              className="group inline-flex items-center px-8 py-4 text-lg font-semibold text-blue-600 bg-white rounded-full hover:bg-gray-50 transform hover:scale-105 transition-all duration-300 shadow-xl hover:shadow-2xl"
-            >
-              <CalculatorIcon className="w-6 h-6 mr-2 group-hover:rotate-12 transition-transform" />
-              Criar Primeiro Orçamento
-            </button>
+            {paymentStatus !== 'success' && (
+              <button
+                onClick={onGetStarted}
+                data-testid="cta-bottom-plans"
+                className="group inline-flex items-center px-8 py-4 text-lg font-semibold text-blue-600 bg-white rounded-full hover:bg-gray-50 transform hover:scale-105 transition-all duration-300 shadow-xl hover:shadow-2xl"
+              >
+                <CalculatorIcon className="w-6 h-6 mr-2 group-hover:rotate-12 transition-transform" />
+                Ver Planos
+              </button>
+            )}
           </div>
         </div>
 

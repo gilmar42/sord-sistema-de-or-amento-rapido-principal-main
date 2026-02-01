@@ -33,7 +33,7 @@ describe('LandingPage', () => {
     const mockGetStarted = jest.fn();
     render(<LandingPage onGetStarted={mockGetStarted} />);
     
-    const button = screen.getByText(/Criar Primeiro Orçamento/i);
+    const button = screen.getByTestId('cta-bottom-plans');
     fireEvent.click(button);
     
     expect(mockGetStarted).toHaveBeenCalledTimes(1);
@@ -43,7 +43,7 @@ describe('LandingPage', () => {
     const mockGetStarted = jest.fn();
     render(<LandingPage onGetStarted={mockGetStarted} />);
     
-    const button = screen.getByRole('button', { name: /Começar Agora/i });
+    const button = screen.getByTestId('cta-hero-plans');
     fireEvent.click(button);
     
     expect(mockGetStarted).toHaveBeenCalledTimes(1);
@@ -61,13 +61,15 @@ describe('LandingPage', () => {
     const mockGetStarted = jest.fn();
     render(<LandingPage onGetStarted={mockGetStarted} paymentStatus="success" />);
     expect(screen.getByText(/Pagamento aprovado/i)).toBeInTheDocument();
-    expect(screen.queryByText(/Começar Agora/i)).not.toBeInTheDocument();
+    expect(screen.queryByTestId('cta-hero-plans')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('cta-bottom-plans')).not.toBeInTheDocument();
   });
 
   it('should show CTA and not payment message when paymentStatus is not success', () => {
     const mockGetStarted = jest.fn();
     render(<LandingPage onGetStarted={mockGetStarted} paymentStatus={null} />);
-    expect(screen.getByText(/Começar Agora/i)).toBeInTheDocument();
+    expect(screen.getByTestId('cta-hero-plans')).toBeInTheDocument();
+    expect(screen.getByTestId('cta-bottom-plans')).toBeInTheDocument();
     expect(screen.queryByText(/Pagamento aprovado/i)).not.toBeInTheDocument();
   });
 

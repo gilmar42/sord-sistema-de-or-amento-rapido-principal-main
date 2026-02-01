@@ -1,15 +1,16 @@
 import React, { useState, useRef } from 'react';
-import { getPlans, createSubscription } from '@/services/paymentService';
+import { getPlans, createSubscription } from '../services/paymentService';
 import { useMercadoPago } from '@/hooks/useMercadoPago';
 
 interface SubscriptionModalProps {
   open: boolean;
   onClose: () => void;
+  preSelectedPlan?: 'monthly' | 'annual' | null;
 }
 
-const SubscriptionModal: React.FC<SubscriptionModalProps> = ({ open, onClose }) => {
+const SubscriptionModal: React.FC<SubscriptionModalProps> = ({ open, onClose, preSelectedPlan = null }) => {
   const [plans, setPlans] = useState<any>(null);
-  const [selected, setSelected] = useState<'monthly' | 'annual' | null>(null);
+  const [selected, setSelected] = useState<'monthly' | 'annual' | null>(preSelectedPlan);
   const [email, setEmail] = useState('');
   const [cardToken, setCardToken] = useState('');
   const [card, setCard] = useState({
@@ -18,8 +19,10 @@ const SubscriptionModal: React.FC<SubscriptionModalProps> = ({ open, onClose }) 
     exp: '',
     cvv: '',
   });
-  // Use apenas process.env para compatibilidade com Jest e Vite
-  const [mpKey] = useState(process.env.VITE_MP_PUBLIC_KEY || '');
+  // Carregar chave do MercadoPago - use process.env para Jest compatibility
+  const mpKey = process.env.VITE_MP_PUBLIC_KEY || 
+                (typeof window !== 'undefined' && (window as any).__VITE_MP_PUBLIC_KEY) || 
+                '';
   const mp = useMercadoPago(mpKey);
   const formRef = useRef<HTMLFormElement>(null);
   const [loading, setLoading] = useState(false);
@@ -28,9 +31,21 @@ const SubscriptionModal: React.FC<SubscriptionModalProps> = ({ open, onClose }) 
 
   React.useEffect(() => {
     if (open) {
-      getPlans().then(setPlans).catch(() => setError('Erro ao buscar planos'));
+      // Buscar planos da API, mas não mostrar erro se falhar
+      getPlans().then(setPlans).catch(() => {
+        // Silenciosamente falhar - os botões ainda funcionam
+        setPlans(null);
+      });
+      // Se recebeu um plano pré-selecionado, usar ele
+      if (preSelectedPlan) {
+        setSelected(preSelectedPlan);
+      }
+    } else {
+      // Limpar erro quando fechar
+      setError(null);
+      setResult(null);
     }
-  }, [open]);
+  }, [open, preSelectedPlan]);
 
   const handleSubscribe = async () => {
     setLoading(true);

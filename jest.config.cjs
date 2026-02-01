@@ -2,8 +2,17 @@ module.exports = {
   preset: 'ts-jest',
   testEnvironment: 'jsdom',
   setupFilesAfterEnv: ['<rootDir>/setupTests.ts'],
+  globals: {
+    'ts-jest': {
+      useESM: true,
+      tsconfig: {
+        module: 'esnext',
+      },
+    },
+  },
+  extensionsToTreatAsEsm: ['.ts', '.tsx'],
   transform: {
-    '^.+\\.(ts|tsx)$': 'ts-jest',
+    '^.+\\.(ts|tsx)$': ['ts-jest', { useESM: true }],
     '^.+\\.(js|jsx|mjs)$': 'babel-jest',
   },
   moduleNameMapper: {

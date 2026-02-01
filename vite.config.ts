@@ -12,11 +12,6 @@ export default defineConfig(({ mode }) => {
       server: {
         port: 3000,
         host: '0.0.0.0',
-        // Forçar tipo MIME para arquivos .tsx e .ts
-        mimeTypes: {
-          '.tsx': 'application/javascript',
-          '.ts': 'application/javascript',
-        },
         proxy: {
           '/api': {
             target: 'http://localhost:5000',

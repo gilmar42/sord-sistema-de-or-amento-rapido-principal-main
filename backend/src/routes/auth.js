@@ -42,9 +42,10 @@ router.post('/signup', async (req, res) => {
       tenantId
     );
 
-    // Create default category
+    // Create default category (unique id per tenant)
+    const categoryId = `C-${Date.now()}`;
     db.prepare('INSERT INTO categories (id, name, tenant_id) VALUES (?, ?, ?)').run(
-      '1',
+      categoryId,
       'Geral',
       tenantId
     );

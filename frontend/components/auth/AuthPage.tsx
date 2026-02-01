@@ -16,7 +16,22 @@ export const AuthPage: React.FC<AuthPageProps> = ({ paymentApproved = false }) =
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-
+  const handleDemoAccess = async () => {
+    setError('');
+    setIsLoading(true);
+    try {
+      const demoEmail = `demo${Date.now()}@sored.demo`;
+      const demoPassword = 'demo123';
+      const success = await signup('Empresa Demo', demoEmail, demoPassword);
+      if (!success) {
+        setError('Erro ao criar acesso demo. Tente criar uma conta.');
+      }
+    } catch (e) {
+      setError('Erro ao criar acesso demo. Tente criar uma conta.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
   useEffect(() => {
     if (paymentApproved) {
       setIsLoginView(false);
@@ -146,6 +161,19 @@ export const AuthPage: React.FC<AuthPageProps> = ({ paymentApproved = false }) =
               </button>
             </div>
           </form>
+                    <div className="mt-4">
+                      <button
+                        type="button"
+                        onClick={handleDemoAccess}
+                        disabled={isLoading}
+                        className="w-full bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline transition-all disabled:opacity-50"
+                      >
+                        🚀 Acesso Demo (Testar Sistema)
+                      </button>
+                      <p className="text-xs text-center text-gray-500 dark:text-gray-400 mt-2">
+                        Cria uma conta temporária automaticamente
+                      </p>
+                    </div>
           <div className="text-center mt-6">
             <button onClick={toggleView} className="inline-block align-baseline font-bold text-sm text-primary hover:text-blue-500">
               {isLoginView ? 'Não tem uma conta? Cadastre-se' : 'Já tem uma conta? Faça login'}
