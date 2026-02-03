@@ -25,6 +25,7 @@ export default defineConfig(({ mode }) => {
         tailwindcss(),
       ],
       build: {
+        outDir: '../frontend/dist',
         target: 'es2020',
         minify: 'terser',
         cssMinify: true,
