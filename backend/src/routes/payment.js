@@ -141,12 +141,15 @@ router.post('/subscriptions', async (req, res) => {
     if (!plan) return res.status(404).json({ error: 'Plano não encontrado' });
     let user = await User.findOne({ email });
     if (!user) user = await User.create({ email });
+    const baseFrontendUrl = process.env.FRONTEND_URL_PRODUCTION || process.env.FRONTEND_URL || 'http://localhost:5173';
+    const successUrl = process.env.MP_SUCCESS_URL || `${baseFrontendUrl}/sucesso`;
+
     // Cria assinatura no Mercado Pago
     const body = {
       preapproval_plan_id: plan.mpPlanId,
       payer_email: email,
       card_token_id: token,
-      back_url: 'https://seusite.com/sucesso',
+      back_url: successUrl,
       status: 'authorized',
     };
     const result = await preApproval.create({ body });

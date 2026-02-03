@@ -8,6 +8,9 @@ module.exports = {
       tsconfig: {
         module: 'esnext',
       },
+      diagnostics: {
+        ignoreCodes: [5103],
+      },
     },
   },
   extensionsToTreatAsEsm: ['.ts', '.tsx'],
@@ -16,6 +19,8 @@ module.exports = {
     '^.+\\.(js|jsx|mjs)$': 'babel-jest',
   },
   moduleNameMapper: {
+    // Mock paymentService to avoid import.meta.env issues in Jest
+    '^@/services/paymentService(?:\\.ts)?$': '<rootDir>/frontend/services/__mocks__/paymentService.ts',
     '^@/(.*)$': '<rootDir>/frontend/$1',
     '\\.(css|less|scss|sass)$': 'identity-obj-proxy',
     // Map all possible import paths for api service to the mock
@@ -26,6 +31,7 @@ module.exports = {
     
     // Mock paymentService to avoid import.meta.env issues in Jest
     '^(?:@/|../|./|/)?services/paymentService(?:\\.ts)?$': '<rootDir>/frontend/services/__mocks__/paymentService.ts',
+    '^.*services/paymentService(?:\\.ts)?$': '<rootDir>/frontend/services/__mocks__/paymentService.ts',
 
     // Force all react and react-dom imports to resolve to the root node_modules
     '^react$': '<rootDir>/node_modules/react',

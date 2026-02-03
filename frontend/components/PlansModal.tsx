@@ -246,7 +246,7 @@ const PlansModal: React.FC<PlansModalProps> = ({ open, onClose }) => {
                       {plan.features.map((feature, index) => (
                         <li key={index} className="flex items-start">
                           <svg
-                            className="w-5 h-5 text-green-500 dark:text-green-400 mr-2 mt-0.5 flex-shrink-0"
+                            className="w-5 h-5 text-green-500 dark:text-green-400 mr-2 mt-0.5 shrink-0"
                             fill="none"
                             stroke="currentColor"
                             viewBox="0 0 24 24"

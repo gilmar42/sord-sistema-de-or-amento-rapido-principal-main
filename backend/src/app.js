@@ -1,5 +1,4 @@
 require('dotenv').config({ path: require('path').resolve(__dirname, '..', '.env') });
-console.log('DEBUG .env MERCADO_PAGO_ACCESS_TOKEN:', process.env.MERCADO_PAGO_ACCESS_TOKEN);
 const express = require('express');
 const cors = require('cors');
 const authRoutes = require('./routes/auth');
@@ -17,23 +16,28 @@ require('./config/mongo')();
 
 const app = express();
 
-// Middleware CORS permissivo para desenvolvimento
+const defaultOrigins = [
+  'http://localhost:3000',
+  'http://localhost:3001',
+  'http://127.0.0.1:3000',
+  'http://127.0.0.1:3001',
+  'http://localhost:5173',
+  'http://127.0.0.1:5173',
+  'http://localhost:4173',
+  'http://127.0.0.1:4173',
+  'http://192.168.0.104:3000',
+  'http://192.168.0.104:3001',
+  'http://192.168.0.104:5173',
+  'https://sord-sistema-de-or-amento-rapido-pr-seven.vercel.app',
+];
+
+const envOrigins = [process.env.FRONTEND_URL, process.env.FRONTEND_URL_PRODUCTION].filter(Boolean);
+const allowedOrigins = Array.from(new Set([...envOrigins, ...defaultOrigins]));
+
+// Middleware CORS (dev + produção via env)
 app.use(
   cors({
-    origin: [
-      'http://localhost:3000',
-      'http://localhost:3001',
-      'http://127.0.0.1:3000',
-      'http://127.0.0.1:3001',
-      'http://localhost:5173',
-      'http://127.0.0.1:5173',
-      'http://localhost:4173',
-      'http://127.0.0.1:4173',
-      'http://192.168.0.104:3000',
-      'http://192.168.0.104:3001',
-      'http://192.168.0.104:5173',
-      'https://sord-sistema-de-or-amento-rapido-pr-seven.vercel.app',
-    ],
+    origin: allowedOrigins,
     credentials: true,
     optionsSuccessStatus: 200, // Garante que preflight responde 200
   })

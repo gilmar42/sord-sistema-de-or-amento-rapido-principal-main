@@ -34,10 +34,10 @@ PAYLOAD='{
 # Gere a assinatura HMAC SHA256
 TIMESTAMP=$(date +%s)
 SECRET="SUA_MP_WEBHOOK_SECRET"
-URL="/api/payments/webhook"
+URL="/api/payments/webhooks"
 SIGNATURE=$(echo -n "$TIMESTAMP$URL$PAYLOAD" | openssl dgst -sha256 -hmac "$SECRET" | sed 's/^.* //')
 
-curl -X POST http://localhost:5000/api/payments/webhook \
+curl -X POST http://localhost:5000/api/payments/webhooks \
   -H "x-signature: ts=$TIMESTAMP, v1=$SIGNATURE" \
   -H "x-event-type: payment" \
   -H "Content-Type: application/json" \
