@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { getPlans, createSubscription } from '../services/paymentService';
+import { getPlans, createSubscription } from '@/services/paymentService';
 import { useMercadoPago } from '@/hooks/useMercadoPago';
 
 interface SubscriptionModalProps {
