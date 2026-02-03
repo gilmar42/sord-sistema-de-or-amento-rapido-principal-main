@@ -1,38 +1,44 @@
 // Mock para paymentService - evita erros com import.meta.env em testes Jest
-export async function getPlans() {
-  return {
-    monthly: { id: 'monthly', name: 'Monthly', price: 29.9 },
-    annual: { id: 'annual', name: 'Annual', price: 299 },
-  };
-}
+export const getPlans = jest.fn().mockResolvedValue({
+  monthly: { id: 'monthly', name: 'Monthly', price: 29.9 },
+  annual: { id: 'annual', name: 'Annual', price: 299 },
+});
 
-export async function createSubscription({ email, token, planType }: { email: string; token: string; planType: 'monthly' | 'annual' }) {
-  return { success: true, subscriptionId: 'mock-subscription-id', email, planType };
-}
+export const createSubscription = jest
+  .fn()
+  .mockImplementation(({ email, token, planType }: { email: string; token: string; planType: 'monthly' | 'annual' }) => ({
+    success: true,
+    subscriptionId: 'mock-subscription-id',
+    email,
+    planType,
+    token,
+  }));
 
-export async function createPixPayment({ email, planType }: { email: string; planType: 'monthly' | 'annual' }) {
-  return {
+export const createPixPayment = jest
+  .fn()
+  .mockImplementation(({ email, planType }: { email: string; planType: 'monthly' | 'annual' }) => ({
     paymentId: 'mock-payment-id',
     status: 'pending',
     qrCode: 'mock-qr-code',
     qrCodeBase64: 'data:image/png;base64,mock',
     expiresAt: new Date(Date.now() + 3600000).toISOString(),
-  };
-}
+    email,
+    planType,
+  }));
 
-export async function getPixPaymentStatus(paymentId: string) {
-  return {
+export const getPixPaymentStatus = jest
+  .fn()
+  .mockImplementation((paymentId: string) => ({
     paymentId,
     status: 'pending',
     detail: null,
-  };
-}
+  }));
 
-export async function getSubscription(id: string) {
-  return {
+export const getSubscription = jest
+  .fn()
+  .mockImplementation((id: string) => ({
     id,
     status: 'active',
     planType: 'monthly',
     email: 'test@example.com',
-  };
-}
+  }));
