@@ -23,6 +23,9 @@ module.exports = {
     // Handles: @/services/api, ../services/api, ./services/api, services/api, with/without .ts extension
     // This ensures the mock is always used by the component
     '^(?:@/|../|./|/)?services/api(?:\\.ts)?$': '<rootDir>/frontend/services/__mocks__/api.ts',
+    
+    // Mock paymentService to avoid import.meta.env issues in Jest
+    '^(?:@/|../|./|/)?services/paymentService(?:\\.ts)?$': '<rootDir>/frontend/services/__mocks__/paymentService.ts',
 
     // Force all react and react-dom imports to resolve to the root node_modules
     '^react$': '<rootDir>/node_modules/react',
