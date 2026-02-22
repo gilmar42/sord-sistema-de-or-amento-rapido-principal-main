@@ -1,4 +1,4 @@
-import path from 'path';
+// import path from 'path';
 import { defineConfig, loadEnv } from 'vite';
 import react from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite';
@@ -25,7 +25,7 @@ export default defineConfig(({ mode }) => {
         tailwindcss(),
       ],
       build: {
-        outDir: path.resolve(__dirname, 'dist'),
+        outDir: 'dist',
         target: 'es2020',
         minify: 'terser',
         cssMinify: true,
@@ -47,7 +47,7 @@ export default defineConfig(({ mode }) => {
       },
       resolve: {
         alias: {
-          '@': path.resolve(__dirname, 'frontend'),
+          '@': 'frontend',
         }
       }
     };
