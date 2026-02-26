@@ -1,18 +1,18 @@
 {
-  "type": "module",
+  
   "name": "sored---sistema-de-orçamento-rápido",
   "private": true,
   "version": "0.0.0",
   "scripts": {
     "dev": "vite",
     "dev:full": "concurrently \"npm run dev\" \"npm run backend\"",
-    "backend": "node backend/src/app.js",
+    "backend": "node backend/src/app.cjs",
     "build": "vite build",
     "preview": "vite preview",
     "test": "cross-env NODE_ENV=test jest --config jest.config.cjs",
     "test:production": "jest --config jest.config.cjs --testPathPattern=\"production|e2e\"",
     "validate:production": "node scripts/validate-production.cjs",
-    "start:backend": "node backend/src/app.js"
+    "start:backend": "node backend/src/app.cjs"
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.1.16",

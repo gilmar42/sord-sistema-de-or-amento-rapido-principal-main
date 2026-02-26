@@ -12,7 +12,7 @@ const Subscription = require('../models/Subscription');
 dotenv.config();
 
 
-const mpClient = new MercadoPagoConfig({ accessToken: process.env.MP_ACCESS_TOKEN || process.env.MERCADO_PAGO_ACCESS_TOKEN });
+const mpClient = new MercadoPagoConfig({ accessToken: process.env.MP_ACCESS_TOKEN });
 const preApproval = new PreApproval(mpClient);
 const preApprovalPlan = new PreApprovalPlan(mpClient);
 const mpPayment = new Payment(mpClient);
