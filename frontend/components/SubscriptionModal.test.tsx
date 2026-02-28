@@ -1,9 +1,12 @@
-import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import SubscriptionModal from './SubscriptionModal';
-import * as paymentService from '@/services/paymentService';
+import '@testing-library/jest-dom';
 
-jest.mock('@/services/paymentService');
+import React from 'react';
+import { render, fireEvent, screen, waitFor } from '@testing-library/react';
+import '@testing-library/jest-dom';
+import SubscriptionModal from '../components/SubscriptionModal';
+import * as paymentService from '../services/paymentService';
+
+jest.mock('../services/paymentService');
 
 const mockPlans = {
   monthlyPlan: { planType: 'monthly', price: 100 },

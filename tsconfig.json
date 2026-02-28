@@ -9,7 +9,7 @@
     ],
     "skipLibCheck": true,
     "esModuleInterop": true,
-    "moduleResolution": "NodeNext",
+    "moduleResolution": "Node",
     "isolatedModules": true,
     "allowJs": true,
     "jsx": "react-jsx",
