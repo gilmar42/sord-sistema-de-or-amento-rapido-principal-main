@@ -19,10 +19,8 @@ const SubscriptionModal: React.FC<SubscriptionModalProps> = ({ open, onClose, pr
     exp: '',
     cvv: '',
   });
-  // Carregar chave do MercadoPago - use process.env para Jest compatibility
-  const mpKey = process.env.VITE_MP_PUBLIC_KEY || 
-                (typeof window !== 'undefined' && (window as any).__VITE_MP_PUBLIC_KEY) || 
-                '';
+  // Carregar chave do MercadoPago corretamente para Vite/React
+  const mpKey = import.meta.env.VITE_MP_PUBLIC_KEY || process.env.VITE_MP_PUBLIC_KEY || '';
   const mp = useMercadoPago(mpKey);
   const formRef = useRef<HTMLFormElement>(null);
   const [loading, setLoading] = useState(false);
